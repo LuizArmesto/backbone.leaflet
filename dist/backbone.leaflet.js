@@ -51,6 +51,35 @@
   // `Backbone.Leaflet.GeoCollection` instances on map.
   var MapView = Leaflet.MapView = Backbone.View.extend({
 
+    // Default options used to create the Leaflet map.
+    defaultMapOptions: {
+      center: [ -23.5, -46.6167 ],
+      zoom: 14
+    },
+
+    // Create the Leaflet map and handle all events and callbacks.
+    initialize: function () {
+      // Set the map options values. `options.map` accepts all `L.Map` options.
+      this.mapOptions = _.defaults( this.options.map || {},
+                                    this.defaultMapOptions );
+      // Create the Leaflet map instance.
+      this.map = new L.Map( this.el, this.mapOptions );
+      // Get the tile layer and add it to map
+      this.tileLayer = this.getTileLayer();
+      this.tileLayer.addTo(this.map);
+    },
+
+    // Return a `L.TileLayer` instance. Uses the `MapQuest` tiles by default.
+    // Override this to use a custom tile layer.
+    getTileLayer: function () {
+      return new L.TileLayer(
+        'http:///{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png', {
+          attribution: 'Data, imagery and map information provided by <a href="http://www.mapquest.com/">MapQuest</a>, <a href="http://www.openstreetmap.org/">Open Street Map</a> and contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>.',
+          subdomains: [ 'otile1', 'otile2', 'otile3', 'otile4' ]
+        }
+      );
+    }
+
   });
 
 

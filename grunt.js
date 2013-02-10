@@ -12,7 +12,7 @@ module.exports = function(grunt) {
     },
     concat: {
       dist: {
-        src: ['<banner>', '<file_strip_banner:lib/<%= pkg.name %>.js>'],
+        src: ['<banner>', '<file_strip_banner:src/<%= pkg.name %>.js>'],
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
@@ -26,7 +26,7 @@ module.exports = function(grunt) {
       all: [ 'test/test.html' ]
     },
     lint: {
-      files: ['grunt.js', 'lib/**/*.js', 'test/backbone.leaflet*.js']
+      files: ['grunt.js', 'src/**/*.js', 'test/backbone.leaflet*.js']
     },
     watch: {
       files: '<config:lint.files>',

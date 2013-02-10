@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <title>Backbone.Leaflet Basic Map Example</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="../lib/css/leaflet.css" />
+    <!--[if lte IE 8]>
+    <link rel="stylesheet" href="../lib/css/leaflet.ie.css" />
+    <![endif]-->
+    <style>
+      #map {
+        width: 700px;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Basic Map Example</h1>
+    <div id="map"></div>
+    <script src="../lib/js/jquery.js"></script>
+    <script src="../lib/js/underscore.js"></script>
+    <script src="../lib/js/backbone.js"></script>
+    <script src="../lib/js/leaflet.js"></script>
+    <script src="../src/backbone.leaflet.js"></script>
+    <script>
+      // Create the map view.
+      var mapView = new Backbone.Leaflet.MapView({
+        el: '#map'
+      });
+
+    </script>
+  </body>
+</html>
