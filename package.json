@@ -1,0 +1,48 @@
+{
+  "name": "backbone.leaflet",
+  "description": "A map component for Backbone.js",
+  "version": "0.0.1-dev",
+  "homepage": "http://github.com/LuizArmesto/backbone.leaflet",
+  "author": {
+    "name": "Luiz Armesto",
+    "email": "luiz.armesto@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/LuizArmesto/backbone.leaflet"
+  },
+  "bugs": {
+    "url": "http://github.com/LuizArmesto/backbone.leaflet/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/LuizArmesto/backbone.leaflet/blob/master/LICENSE"
+    }
+  ],
+  "preferGlobal": true,
+  "dependencies": {
+    "backbone": "~0.9.10",
+    "underscore": "1.4.4",
+    "leaflet-engine": "0.4.5"
+  },
+  "devDependencies": {
+    "grunt-mocha" : "~0.1.7",
+    "grunt": "~0.3.0",
+    "backbone": "~0.9.10",
+    "underscore": "1.4.4",
+    "leaflet-engine": "0.4.5"
+  },
+  "keywords": [
+      "backbone",
+      "leaflet",
+      "map"
+  ],
+  "engines": {
+    "node": ">= 0.6.6"
+  },
+  "main": "lib/backbone.leaflet",
+  "scripts": {
+    "test": "grunt test"
+  }
+}
