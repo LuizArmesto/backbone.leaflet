@@ -83,4 +83,29 @@
   });
 
 
+  // Backbone.Leaflet.SatelliteView
+  // ------------------------------
+
+  // Backbone view to display `Backbone.Leaflet.GeoModel` and
+  // `Backbone.Leaflet.GeoCollection` instances on satellite map.
+  // Extends `Backbone.Leaflet.MapView`.
+  var SatelliteView = Leaflet.SatelliteView = MapView.extend({
+    // Default options used to create the Leaflet map.
+    defaultMapOptions: {
+      center: [ -23.5, -46.6167 ],
+      zoom: 11
+    },
+
+    // Replace the default tile layer with the `MapQuest` `Open Aerial` tiles.
+    getTileLayer: function () {
+      return new L.TileLayer(
+        'http:///{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg', {
+        attribution: 'Data and imagery provided by <a href="http://www.mapquest.com/">MapQuest</a>. Portions Courtesy NASA/JPL-Caltech and U.S. Depart. of Agriculture, Farm Service Agency.',
+          subdomains: [ 'otile1', 'otile2', 'otile3', 'otile4' ]
+        }
+      );
+    }
+
+  });
+
 }( Backbone, _, jQuery, L ));

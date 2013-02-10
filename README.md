@@ -4,13 +4,17 @@
 
 *This project is not usable yet!*
 
-## Backbone.Leaflet.MapView
-
-####1. Create a new GeoCollection
+## Backbone.Leaflet.GeoModel
 
 *TODO*
 
-####2. Create a new MapView
+## Backbone.Leaflet.GeoCollection
+
+*TODO*
+
+## Backbone.Leaflet.MapView
+
+The `MapView` is a [`Backbone` View](http://backbonejs.org/#View) to display `GeoCollection` and `GeoModel` on [`Leaflet`](http://leafletjs.com/) map, using [`MapQuest-OSM`](http://developer.mapquest.com/web/products/open/map) tiles.
 
 ```javascript
 var mapView = new Backbone.Leaflet.MapView({
@@ -18,7 +22,7 @@ var mapView = new Backbone.Leaflet.MapView({
   // The DOM element where the map will be rendered.
   el: '#map',
 
-  // The `GeoCollection` created above.
+  // See above how to ceate a `GeoCollection` instance.
   collection: geoCollection,
 
   // `L.map` options (optional).
@@ -29,6 +33,10 @@ var mapView = new Backbone.Leaflet.MapView({
 
 });
 ```
+
+## Backbone.Leaflet.SatelliteView
+
+The `SatelliteView` works similar to `MapView`, except that uses [`MapQuest Open Aerial`](http://developer.mapquest.com/web/products/open/map) tiles.
 
 ## Contributing
 Indent your code with 2 spaces, strip trailing whitespace and take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using grunt.
