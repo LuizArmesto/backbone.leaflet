@@ -1,4 +1,4 @@
-/*! backbone.leaflet - v0.0.1-dev - 2/10/2013
+/*! backbone.leaflet - v0.0.1-dev - 2/11/2013
 * http://github.com/LuizArmesto/backbone.leaflet
 * Copyright (c) 2013 Luiz Armesto; Licensed MIT */
 
@@ -44,6 +44,10 @@
   });
 
 
+  // Cached regex to split keys for `delegate`.
+  var delegateEventSplitter = /^(\S+)\s*(.*)$/;
+
+
   // Backbone.Leaflet.MapView
   // ------------------------
 
@@ -57,9 +61,11 @@
       zoom: 14
     },
 
+
     // Create the Leaflet map and handle all events and callbacks.
     initialize: function () {
       // Set the map options values. `options.map` accepts all `L.Map` options.
+      // http://leafletjs.com/reference.html#map-constructor
       this.mapOptions = _.defaults( this.options.map || {},
                                     this.defaultMapOptions );
       // Create the Leaflet map instance.
@@ -67,7 +73,56 @@
       // Get the tile layer and add it to map
       this.tileLayer = this.getTileLayer();
       this.tileLayer.addTo(this.map);
+      return this;
     },
+
+
+    // Call `Backbone.View.prototype.delegateEvents` then bind events with
+    // `map` selector to `Leaflet` map object.
+    //
+    // See `Leaflet` documentation to get available events.
+    // http://leafletjs.com/reference.html#map-events
+    delegateEvents: function ( events ) {
+      var context = 'delegateEvents' + this.cid;
+      Backbone.View.prototype.delegateEvents.apply( this, arguments );
+      // Do everything as `Backbone` do but bind to `Leaflet`.
+      if ( !( events || ( events = _.result( this, 'events' ) ) ) ) {
+        return this;
+      }
+      this._leaflet_events = {};
+      for ( var key in events ) {
+        var method = events[key];
+        if ( !_.isFunction( method ) ) {
+          method = this[events[key]];
+        }
+        if ( !method ) {
+          throw new Error( 'Method "' + events[key] + '" does not exist' );
+        }
+        var match = key.match( delegateEventSplitter ),
+            eventName = match[1],
+            selector = match[2];
+        method = _.bind( method, this );
+
+        // Now we bind events with `map` selector to `Leaflet` map.
+        if ( selector === 'map') {
+          this.map.on( eventName, method, context );
+          // Save the callbacks references to use to undelegate the events.
+          this._leaflet_events[eventName] = method;
+        }
+      }
+      return this;
+    },
+
+
+    // Clears all callbacks previously bound to the map with our custom
+    // `delegateEvents`, then call `undelegateEvents` from `Backbone.View`.
+    undelegateEvents: function () {
+      var context = 'delegateEvents' + this.cid;
+      this.map.off( this._leaflet_events || {}, context );
+      this._leaflet_events = null;
+      return Backbone.View.prototype.undelegateEvents.apply( this, arguments );
+    },
+
 
     // Return a `L.TileLayer` instance. Uses the `MapQuest` tiles by default.
     // Override this to use a custom tile layer.
@@ -90,13 +145,15 @@
   // `Backbone.Leaflet.GeoCollection` instances on satellite map.
   // Extends `Backbone.Leaflet.MapView`.
   var SatelliteView = Leaflet.SatelliteView = MapView.extend({
+
     // Default options used to create the Leaflet map.
     defaultMapOptions: {
       center: [ -23.5, -46.6167 ],
       zoom: 11
     },
 
-    // Replace the default tile layer with the `MapQuest` `Open Aerial` tiles.
+
+    // Replace the default tile layer to use `MapQuest Open Aerial` tiles.
     getTileLayer: function () {
       return new L.TileLayer(
         'http:///{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg', {

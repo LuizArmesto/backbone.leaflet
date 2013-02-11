@@ -15,15 +15,37 @@
   </head>
   <body>
     <h1>Basic Map Example</h1>
+    <p>Click map to get coordinates.</p>
     <div id="map"></div>
+    <div id="message"></div>
     <script src="../lib/js/jquery.js"></script>
     <script src="../lib/js/underscore.js"></script>
     <script src="../lib/js/backbone.js"></script>
     <script src="../lib/js/leaflet.js"></script>
     <script src="../src/backbone.leaflet.js"></script>
     <script>
-      // Create the map view.
-      var mapView = new Backbone.Leaflet.MapView({
+
+      // Extend `Backbone.Leaflet.MapView` to bind map events.
+      var MyMapView = Backbone.Leaflet.MapView.extend({
+        // Bind `map`events using `map` as selector.
+        events: {
+          'click map': 'onClick'
+        },
+
+        // Display the coordinates when user click on map.
+        onClick: function (e) {
+          var lat = e.latlng.lat,
+              lng = e.latlng.lng;
+
+          // This is not the `Backbone` way to manipulate DOM, but we want to
+          // keep this example as simple as possible.
+          $( '#message' ).html( '<strong>Latitude:</strong> '  + lat + ', ' +
+                                '<strong>Longitude:</strong> ' + lng );
+        }
+      });
+
+      // Create the map instance.
+      var mapView = new MyMapView({
         el: '#map'
       });
 
