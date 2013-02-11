@@ -51,27 +51,20 @@
 
   // Backbone view to display `Backbone.Leaflet.GeoModel` and
   // `Backbone.Leaflet.GeoCollection` instances on map.
-  var MapView = Leaflet.MapView = Backbone.View.extend({
+  var MapView = Leaflet.MapView = function (options) {
+    Backbone.View.apply( this, arguments );
+  };
+
+  // Set up inheritance.
+  MapView.extend = Backbone.View.extend;
+
+  // Inherit `Backbone.View`.
+  _.extend( MapView.prototype, Backbone.View.prototype, {
 
     // Default options used to create the Leaflet map.
     defaultMapOptions: {
       center: [ -23.5, -46.6167 ],
       zoom: 14
-    },
-
-
-    // Create the Leaflet map and handle all events and callbacks.
-    initialize: function () {
-      // Set the map options values. `options.map` accepts all `L.Map` options.
-      // http://leafletjs.com/reference.html#map-constructor
-      this.mapOptions = _.defaults( this.options.map || {},
-                                    this.defaultMapOptions );
-      // Create the Leaflet map instance.
-      this.map = new L.Map( this.el, this.mapOptions );
-      // Get the tile layer and add it to map
-      this.tileLayer = this.getTileLayer();
-      this.tileLayer.addTo(this.map);
-      return this;
     },
 
 
@@ -81,6 +74,7 @@
     // See `Leaflet` documentation to get available events.
     // http://leafletjs.com/reference.html#map-events
     delegateEvents: function ( events ) {
+      this._ensureMap();
       var context = 'delegateEvents' + this.cid;
       Backbone.View.prototype.delegateEvents.apply( this, arguments );
       // Do everything as `Backbone` do but bind to `Leaflet`.
@@ -131,6 +125,22 @@
           subdomains: [ 'otile1', 'otile2', 'otile3', 'otile4' ]
         }
       );
+    },
+
+
+    // Ensure that the view has a `Leaflet` map object.
+    _ensureMap: function () {
+      if ( !this.map ) {
+        // Set the map options values. `options.map` accepts all `L.Map` options.
+        // http://leafletjs.com/reference.html#map-constructor
+        this.mapOptions = _.defaults( this.options.map || {},
+                                      this.defaultMapOptions );
+        // Create the Leaflet map instance.
+        this.map = new L.Map( this.el, this.mapOptions );
+        // Get the tile layer and add it to map
+        this.tileLayer = this.getTileLayer();
+        this.tileLayer.addTo(this.map);
+      }
     }
 
   });
