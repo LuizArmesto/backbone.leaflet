@@ -15,8 +15,16 @@ describe( 'Backbone.Leaflet.MapView', function () {
     this.mapView = null;
   });
 
+  it( 'should allow inheritance', function () {
+    var MapView = Backbone.Leaflet.MapView;
+    expect( MapView.extend ).to.be.equal( Backbone.View.extend );
+    // Should not override `initialize` function.
+    expect( MapView.prototype.initialize ).to.be.equal( Backbone.View.prototype.initialize );
+  });
+
   it( 'should have `map` attribute', function () {
     expect( this.mapView ).to.have.property( 'map' );
+    expect( this.mapView.map ).to.be.instanceOf( L.Map );
   });
 
   it( 'should append `Leaflet` DOM elements', function () {
