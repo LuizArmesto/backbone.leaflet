@@ -26,8 +26,39 @@ describe( 'Backbone.Leaflet.GeoCollection', function () {
     expect( this.geoCollection.layer ).to.be.instanceOf( L.GeoJSON );
   });
 
-  // TODO:
-  // * Test `modelFilter`
-  // * Test `modelStyle`
+  it( 'should not filter models by default', function () {
+    var modelFake = {};
+    expect( this.geoCollection.modelFilter( modelFake ) ).to.be.equal( true );
+  });
+
+  it( 'should accept `filter` option', function () {
+    var modelFake = {};
+    var geoCollection = new Backbone.Leaflet.GeoCollection( [], {
+      filter: function ( model ) {
+        // Should receive the `modelFilter` arguments.
+        expect( model ).to.be.equal( modelFake );
+        // Should be binded.
+        expect( this ).to.be.equal( geoCollection );
+        return false;
+      }
+    });
+    // Should returns the return from `filter`function defined above.
+    expect( geoCollection.modelFilter( modelFake ) ).to.be.equal( false );
+  });
+
+  it( 'should use `defaultStyle` as fallback to `modelStyle` function', function () {
+    var modelFake = {};
+    expect( this.geoCollection.modelStyle( modelFake ) ).to.be.equal( this.geoCollection.defaultStyle );
+  });
+
+  it( 'should get style from  models `getStyle` function if exists', function () {
+    var myStyle = { color: '#fff' };
+    var modelFake = {
+      getStyle: function () {
+        return myStyle;
+      }
+    };
+    expect( this.geoCollection.modelStyle( modelFake ) ).to.be.equal( myStyle );
+  });
 
 });

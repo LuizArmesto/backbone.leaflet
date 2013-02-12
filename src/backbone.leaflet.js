@@ -52,7 +52,7 @@
   // ------------------------------
 
   // Extend Backbone.Collectio, adding georef support.
-  var GeoCollection = Leaflet.GeoCollection = function ( options ) {
+  var GeoCollection = Leaflet.GeoCollection = function ( models, options ) {
     Backbone.Collection.apply( this, arguments );
     this.options = options || {};
     this._ensureLayer();
@@ -65,9 +65,19 @@
   _.extend( GeoCollection.prototype, Backbone.Collection.prototype, {
 
     // Default options used to create the Leaflet map.
+    // See http://leafletjs.com/reference.html#geojson-options
     defaultLayerOptions: {
       filter: layerFilter,
       style: layerStyle
+    },
+
+    // Default visual style to be applied to model exhibition on map.
+    // For more information see
+    // http://leafletjs.com/reference.html#marker-options
+    // http://leafletjs.com/reference.html#path-options
+    // http://leafletjs.com/reference.html#polyline-options
+    defaultStyle: {
+
     },
 
     // Function that will be used to decide whether to show a feature or not.
@@ -78,7 +88,7 @@
     // Override this to create a custom default filter.
     modelFilter: function ( model ) {
       if ( this.options.filter && _.isFunction( this.options.filter ) ) {
-        return this.options.filter( model );
+        return this.options.filter.apply( this, arguments );
       }
       return true;
     },
@@ -88,7 +98,7 @@
     modelStyle: function ( model ) {
       if ( this.options.style ) {
         if ( _.isFunction( this.options.style ) ) {
-          return this.options.style( model );
+          return this.options.style.apply( this, arguments );
         } else {
           return this.options.style;
         }
