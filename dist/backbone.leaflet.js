@@ -82,6 +82,15 @@
 
     },
 
+    toJSON: function ( options ) {
+      var features = Backbone.Collection.prototype.toJSON.apply( this,
+                                                                 arguments );
+      return {
+        type: 'FeatureCollection',
+        features: features
+      };
+    },
+
     // Function that will be used to decide whether to show a feature or not.
     // Returns `true` to show or `false` to hide.
     //

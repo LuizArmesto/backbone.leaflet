@@ -61,4 +61,22 @@ describe( 'Backbone.Leaflet.GeoCollection', function () {
     expect( this.geoCollection.modelStyle( modelFake ) ).to.be.equal( myStyle );
   });
 
+  it( 'should have `toJSON` returning GeoJSON', function () {
+    var featureGeoJSON = {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [102.0, 0.5]
+      },
+      properties: {}
+    };
+    var model = new Backbone.Leaflet.GeoModel( featureGeoJSON );
+    var geoCollection = new Backbone.Leaflet.GeoCollection( [model] );
+    expect( geoCollection.toJSON() ).to.be.deep.equal( {
+      type: 'FeatureCollection',
+      features: [featureGeoJSON]
+    });
+
+  });
+
 });
