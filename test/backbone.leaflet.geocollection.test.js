@@ -2,13 +2,31 @@
   describe: true, expect: true, sinon: true, it: true,
   beforeEach: true, afterEach: true, window: true*/
 
+// Seting some helpful objects.
+var featureGeoJSON = {
+  type: 'Feature',
+  geometry: {
+    type: 'Point',
+    coordinates: [102.0, 0.5]
+  },
+  properties: {}
+};
+
+var featureCollectionGeoJSON = {
+  type: 'FeatureCollection',
+  features: [
+    _.extend( { id: 1 }, featureGeoJSON ),
+    _.extend( { id: 2 }, featureGeoJSON )
+  ]
+};
+
 // GeoCollection tests
 // -------------------
 describe( 'GeoCollection', function () {
 
   beforeEach( function () {
     // Create new `GeoCollection` instance before each test.
-    this.geoCollection = new Backbone.Leaflet.GeoCollection({});
+    this.geoCollection = new Backbone.Leaflet.GeoCollection( [], {} );
   });
 
   afterEach( function () {
@@ -32,6 +50,12 @@ describe( 'GeoCollection', function () {
       expect( this.geoCollection.layer ).to.be.instanceOf( L.GeoJSON );
     });
 
+    it( 'should accept GeoJSON as `models` param', function () {
+      var geoCollection = new Backbone.Leaflet.GeoCollection( featureCollectionGeoJSON, {} );
+      expect( geoCollection.models.length ).to.be.equal( 2 );
+      expect( geoCollection.models[0].id ).to.be.equal( 1 );
+      expect( geoCollection.models[1].id ).to.be.equal( 2 );
+    });
   });
 
   // Map elements filter tests
@@ -86,14 +110,6 @@ describe( 'GeoCollection', function () {
   describe( 'toJSON', function () {
 
     it( 'should return GeoJSON', function () {
-      var featureGeoJSON = {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [102.0, 0.5]
-        },
-        properties: {}
-      };
       var model = new Backbone.Leaflet.GeoModel( featureGeoJSON );
       var geoCollection = new Backbone.Leaflet.GeoCollection( [model] );
       expect( geoCollection.toJSON() ).to.be.deep.equal( {

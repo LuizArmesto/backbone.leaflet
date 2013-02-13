@@ -55,7 +55,11 @@
 
   // Extend Backbone.Collectio, adding georef support.
   var GeoCollection = Leaflet.GeoCollection = function ( models, options ) {
-    Backbone.Collection.apply( this, arguments );
+    // Accpets FeatureCollection GeoJSON as `models` param.
+    if ( models && !_.isArray( models ) && models.features ) {
+       models = models.features;
+    }
+    Backbone.Collection.apply( this, [models, options] );
     this.options = options || {};
     this._ensureLayer();
   };
