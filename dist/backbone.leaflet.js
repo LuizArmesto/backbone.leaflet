@@ -1,4 +1,4 @@
-/*! backbone.leaflet - v0.0.1-dev - 2/12/2013
+/*! backbone.leaflet - v0.0.1-dev - 2/13/2013
 * http://github.com/LuizArmesto/backbone.leaflet
 * Copyright (c) 2013 Luiz Armesto; Licensed MIT */
 
