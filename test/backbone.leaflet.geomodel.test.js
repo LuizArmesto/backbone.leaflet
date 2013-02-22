@@ -50,8 +50,8 @@
 
     });
 
-    // get
-    // ---
+    // Backbone functions tests
+    // ------------------------
     describe( 'get', function () {
 
       it( 'should access GeoJSON `properties` directly', function () {
@@ -65,8 +65,6 @@
 
     });
 
-    // toJSON
-    // ------
     describe( 'toJSON', function () {
 
      it( 'should return GeoJSON', function () {

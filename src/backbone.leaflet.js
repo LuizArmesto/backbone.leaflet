@@ -95,7 +95,7 @@
   var GeoCollection = Leaflet.GeoCollection = function ( models, options ) {
     // Accpets FeatureCollection GeoJSON as `models` param.
     if ( models && !_.isArray( models ) && models.features ) {
-       models = models.features;
+      models = models.features;
     }
     Backbone.Collection.apply( this, [models, options] );
     this.options = options || {};
@@ -107,6 +107,8 @@
 
   // Inherit `Backbone.Collection`.
   _.extend( GeoCollection.prototype, Backbone.Collection.prototype, {
+    // Default model.
+    model: GeoModel,
 
     // Default options used to create the Leaflet map.
     // See http://leafletjs.com/reference.html#geojson-options

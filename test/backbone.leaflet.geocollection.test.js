@@ -15,11 +15,17 @@
     properties: {}
   };
 
+  var featureA = _.clone( featureGeoJSON );
+  var featureB = _.clone( featureGeoJSON );
+
+  featureA.properties = { id: 1 };
+  featureB.properties = { id: 2 };
+
   var featureCollectionGeoJSON = {
     type: 'FeatureCollection',
     features: [
-      _.extend( { id: 1 }, featureGeoJSON ),
-      _.extend( { id: 2 }, featureGeoJSON )
+      featureA,
+      featureB
     ]
   };
 
@@ -54,9 +60,10 @@
 
       it( 'should accept GeoJSON as `models` param', function () {
         var geoCollection = new Backbone.Leaflet.GeoCollection( featureCollectionGeoJSON, {} );
-        expect( geoCollection.models.length ).to.be.equal( 2 );
+        expect( geoCollection.models.length ).to.be.equal( 2, 'should create 2 models' );
         expect( geoCollection.models[0].id ).to.be.equal( 1 );
         expect( geoCollection.models[1].id ).to.be.equal( 2 );
+        expect( geoCollection.models[0] ).to.be.instanceOf( Backbone.Leaflet.GeoModel );
       });
     });
 
