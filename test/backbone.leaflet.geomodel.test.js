@@ -97,7 +97,8 @@
         expect( this.geoModel.toJSON() ).to.be.deep.equal({
           type: 'Feature',
           geometry: geometry,
-          properties: _.extend({ hey: 'You', yabba: 'Dabadoo' }, featureGeoJSON.properties)
+          properties: _.extend({ hey: 'You', yabba: 'Dabadoo' },
+                               featureGeoJSON.properties )
         });
      });
 

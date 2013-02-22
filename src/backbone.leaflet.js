@@ -56,13 +56,47 @@
     // http://www.geojson.org/geojson-spec.html#feature-objects
     toJSON: function ( options ) {
       var attrs, props, geometry;
+      options = options || {};
       attrs = _.clone( this.attributes );
       props = _.omit( attrs, 'geometry' );
+      if ( options.cid ) {
+        props.cid = this.cid;
+      }
       geometry = attrs['geometry'] || null;
       return {
         type: 'Feature',
         properties: props,
         geometry: geometry
+      };
+    }
+
+  });
+
+
+  // Backbone.Leaflet.GeoCollection
+  // ------------------------------
+
+  // Extend `Backbone.Collection`, adding georef support.
+  var GeoCollection = Leaflet.GeoCollection = Backbone.Collection.extend({
+    // Default model.
+    model: GeoModel,
+
+    reset: function ( models, options ) {
+      // Accpets FeatureCollection GeoJSON as `models` param.
+      if ( models && !_.isArray( models ) && models.features ) {
+        models = models.features;
+      }
+      return Backbone.Collection.prototype.reset.apply( this, [models, options] );
+    },
+
+    // The GeoJSON representation of a `FeatureCollection`.
+    // http://www.geojson.org/geojson-spec.html#feature-collection-objects
+    toJSON: function ( options ) {
+      var features = Backbone.Collection.prototype.toJSON.apply( this,
+                                                                 arguments );
+      return {
+        type: 'FeatureCollection',
+        features: features
       };
     }
 
@@ -75,10 +109,8 @@
   // Default filter function to GeoJSON layer.
   var layerFilter = function ( feature, layer ) {
     var model;
-    if ( layer === this.layer ) {
-      model = this._getModelByFeature( feature );
-      this.modelFilter( model );
-    }
+    model = this._getModelByFeature( feature );
+    return this.modelFilter( model );
   };
 
   // Default style function to GeoJSON layer.
@@ -87,105 +119,10 @@
     this.modelStyle( model );
   };
 
-
-  // Backbone.Leaflet.GeoCollection
-  // ------------------------------
-
-  // Extend `Backbone.Collection`, adding georef support.
-  var GeoCollection = Leaflet.GeoCollection = function ( models, options ) {
-    // Accpets FeatureCollection GeoJSON as `models` param.
-    if ( models && !_.isArray( models ) && models.features ) {
-      models = models.features;
-    }
-    Backbone.Collection.apply( this, [models, options] );
-    this.options = options || {};
-    this._ensureLayer();
+  // Default style function to GeoJSON layer.
+  var layerOnEachFeature = function ( feature, layer ) {
+    this.layers[feature.properties.cid] = layer;
   };
-
-  // Set up inheritance.
-  GeoCollection.extend = Backbone.Collection.extend;
-
-  // Inherit `Backbone.Collection`.
-  _.extend( GeoCollection.prototype, Backbone.Collection.prototype, {
-    // Default model.
-    model: GeoModel,
-
-    // Default options used to create the Leaflet map.
-    // See http://leafletjs.com/reference.html#geojson-options
-    defaultLayerOptions: {
-      filter: layerFilter,
-      style: layerStyle
-    },
-
-    // Default visual style to be applied to model exhibition on map.
-    // For more information see
-    // http://leafletjs.com/reference.html#marker-options
-    // http://leafletjs.com/reference.html#path-options
-    // http://leafletjs.com/reference.html#polyline-options
-    defaultStyle: {
-
-    },
-
-    // The GeoJSON representation of a `FeatureCollection`.
-    // http://www.geojson.org/geojson-spec.html#feature-collection-objects
-    toJSON: function ( options ) {
-      var features = Backbone.Collection.prototype.toJSON.apply( this,
-                                                                 arguments );
-      return {
-        type: 'FeatureCollection',
-        features: features
-      };
-    },
-
-    // Function that will be used to decide whether to show a feature or not.
-    // Returns `true` to show or `false` to hide.
-    //
-    // The default implementation looks for `filter` option passed to
-    // constructor, if none `filter` option was passed shows all models.
-    // Override this to create a custom default filter.
-    modelFilter: function ( model ) {
-      if ( this.options.filter && _.isFunction( this.options.filter ) ) {
-        return this.options.filter.apply( this, arguments );
-      }
-      return true;
-    },
-
-    // Function that will be used to get style options for vector layers
-    // created for GeoJSON features.
-    modelStyle: function ( model ) {
-      if ( this.options.style ) {
-        if ( _.isFunction( this.options.style ) ) {
-          return this.options.style.apply( this, arguments );
-        } else {
-          return this.options.style;
-        }
-      }
-      if ( model.getStyle && _.isFunction( model.getStyle ) ) {
-        return model.getStyle();
-      }
-      return this.defaultStyle;
-    },
-
-    // Returns the Backbone Model associated to the Leaflet Feature received.
-    _getModelByFeature: function ( feature ) {
-      // TODO
-    },
-
-    // Ensure that the collection has a `GeoJSON` layer.
-    _ensureLayer: function () {
-      var methods;
-      if ( !this.layer ) {
-        this.layerOptions = _.defaults( this.options.layer || {},
-                                        this.defaultLayerOptions );
-        methods = ['filter', 'style'];
-        _.each( methods, function ( method ) {
-          this.layerOptions[method] = _.bind( this.layerOptions[method], this );
-        }, this );
-        this.layer = new L.GeoJSON( null, this.layerOptions );
-      }
-    }
-
-  });
 
 
   // Cached regex to split keys for `delegate`.
@@ -199,6 +136,20 @@
   // `Backbone.Leaflet.GeoCollection` instances on map.
   var MapView = Leaflet.MapView = function ( options ) {
     Backbone.View.apply( this, arguments );
+    this.layers = {};
+    if ( this.collection ) {
+      if ( !this.collection instanceof GeoCollection ) {
+        throw new Error( 'The "collection" option should be instance of "GeoCollection" to be used within Map view' );
+      }
+      this._ensureMap();
+      // Create a GeoJSON layer associated with the collection
+      this.collectionLayer = this.getLayer();
+      this.collectionLayer.addTo( this.map );
+      // Bind Collection events.
+      this.listenTo( this.collection, 'reset', this.render );
+      this.listenTo( this.collection, 'add', this._onAdd );
+      this.listenTo( this.collection, 'remove', this._onRemove );
+    }
   };
 
   // Set up inheritance.
@@ -206,11 +157,38 @@
 
   // Inherit `Backbone.View`.
   _.extend( MapView.prototype, Backbone.View.prototype, {
+    // Default options used to create the Leaflet map.
+    // See http://leafletjs.com/reference.html#geojson-options
+    defaultLayerOptions: {
+      filter: layerFilter,
+      style: layerStyle,
+      onEachFeature: layerOnEachFeature
+    },
+
+    // Default visual style to be applied to model exhibition on map.
+    // For more information see
+    // http://leafletjs.com/reference.html#marker-options
+    // http://leafletjs.com/reference.html#path-options
+    // http://leafletjs.com/reference.html#polyline-options
+    defaultStyle: {
+
+    },
 
     // Default options used to create the Leaflet map.
     defaultMapOptions: {
       center: [ -23.5, -46.6167 ],
       zoom: 14
+    },
+
+    render: function () {
+      return this.redraw();
+    },
+
+    redraw: function () {
+      this.layers = {};
+      this.collectionLayer.clearLayers();
+      this.collectionLayer.addData( this.collection.toJSON({ cid: true }) );
+      return this;
     },
 
     // Call `Backbone.View.prototype.delegateEvents` then bind events with
@@ -219,7 +197,7 @@
     // See `Leaflet` documentation to get available events.
     // http://leafletjs.com/reference.html#map-events
     delegateEvents: function ( events ) {
-      this._ensureMap();
+          this._ensureMap();
       var context = 'delegateEvents' + this.cid;
       Backbone.View.prototype.delegateEvents.apply( this, arguments );
       // Do everything as `Backbone` do but bind to `Leaflet`.
@@ -282,6 +260,74 @@
         // Get the tile layer and add it to map
         this.tileLayer = this.getTileLayer();
         this.tileLayer.addTo(this.map);
+      }
+    },
+
+    // Function that will be used to decide whether to show a feature or not.
+    // Returns `true` to show or `false` to hide.
+    //
+    // The default implementation looks for `filter` option passed to
+    // constructor, if none `filter` option was passed shows all models.
+    // Override this to create a custom default filter.
+    modelFilter: function ( model ) {
+      if ( !model ) {
+        return true;
+      }
+      if ( this.options.filter && _.isFunction( this.options.filter ) ) {
+        return this.options.filter.apply( this, arguments );
+      }
+      // Don't allow duplicated points for the same model
+      return !this.layers[model.cid];
+    },
+
+    // Function that will be used to get style options for vector layers
+    // created for GeoJSON features.
+    modelStyle: function ( model ) {
+      if ( !model ) {
+        return this.defaultStyle;
+      }
+      if ( this.options.style ) {
+        if ( _.isFunction( this.options.style ) ) {
+          return this.options.style.apply( this, arguments );
+        } else {
+          return this.options.style;
+        }
+      }
+      if ( model.getStyle && _.isFunction( model.getStyle ) ) {
+        return model.getStyle();
+      }
+      return this.defaultStyle;
+    },
+
+    // Returns the Backbone Model associated to the Leaflet Feature received.
+    _getModelByFeature: function ( feature ) {
+      var models = _.where( this.collection.models, {cid: feature.properties.cid} );
+      return models[0];
+    },
+
+    // Ensure that the collection has a `GeoJSON` layer.
+    getLayer: function () {
+      var methods, layerOptions;
+      layerOptions = _.defaults( this.options.layer || {},
+                                 this.defaultLayerOptions );
+      methods = ['filter', 'style', 'onEachFeature'];
+      _.each( methods, function ( method ) {
+        layerOptions[method] = _.bind( layerOptions[method], this );
+      }, this );
+      return new L.GeoJSON( null, layerOptions );
+    },
+
+    // Add to map the model added to collection
+    _onAdd: function ( model ) {
+      this.collectionLayer.addData( model.toJSON({ cid: true }) );
+    },
+
+    // Remove from map the model removed from collection
+    _onRemove: function ( model ) {
+      var layer = this.layers[model.cid];
+      if ( layer ) {
+        this.collectionLayer.removeLayer( layer );
+        this.layers[model.cid] = null;
       }
     }
 

@@ -83,6 +83,64 @@
 
     });
 
+    // Leaflet integration tests
+    // -------------------------
+    describe( 'Leaflet integration', function () {
+
+      it( 'should create a GeoJSON layer', function () {
+        expect( this.mapView ).to.have.property( 'getLayer' );
+        expect( this.mapView.getLayer() ).to.be.instanceOf( L.GeoJSON );
+      });
+
+    });
+
+    // Map elements filter tests
+    // -------------------------
+    describe( 'modelFilter', function () {
+
+      it( 'should not filter models by default', function () {
+        var modelFake = {};
+        expect( this.mapView.modelFilter( modelFake ) ).to.be.equal( true );
+      });
+
+      it( 'should accept `filter` option', function () {
+        var modelFake = {};
+        var mapView = new Backbone.Leaflet.MapView({
+          filter: function ( model ) {
+            // Should receive the `modelFilter` arguments.
+            expect( model ).to.be.equal( modelFake );
+            // Should be binded.
+            expect( this ).to.be.equal( mapView );
+            return false;
+          }
+        });
+        // Should returns the return from `filter`function defined above.
+        expect( mapView.modelFilter( modelFake ) ).to.be.equal( false );
+      });
+
+    });
+
+    // Map elements style tests
+    // ------------------------
+    describe( 'modelStyle', function () {
+
+      it( 'should use `defaultStyle` as fallback to `modelStyle` function', function () {
+        var modelFake = {};
+        expect( this.mapView.modelStyle( modelFake ) ).to.be.equal( this.mapView.defaultStyle );
+      });
+
+      it( 'should get style from  models `getStyle` function if exists', function () {
+        var myStyle = { color: '#fff' };
+        var modelFake = {
+          getStyle: function () {
+            return myStyle;
+          }
+        };
+        expect( this.mapView.modelStyle( modelFake ) ).to.be.equal( myStyle );
+      });
+
+    });
+
   });
 
 }());
