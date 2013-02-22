@@ -1,4 +1,4 @@
-/*! backbone.leaflet - v0.0.1-dev - 2/13/2013
+/*! backbone.leaflet - v0.0.1-dev - 2/22/2013
 * http://github.com/LuizArmesto/backbone.leaflet
 * Copyright (c) 2013 Luiz Armesto; Licensed MIT */
 
@@ -29,16 +29,48 @@
   // Backbone.Leaflet.GeoModel
   // -------------------------
 
-  // Extend Backbone.Model, adding georef support.
+  // Extend `Backbone.Model`, adding georef support.
   var GeoModel = Leaflet.GeoModel = Backbone.Model.extend({
+
+    // Set a hash of model attributes on the object, firing `"change"` unless
+    // you choose to silence it.
+    set: function ( key, val, options ) {
+      var attrs, _attrs;
+      // Handle both `"key", value` and `{key: value}` -style arguments.
+      if ( typeof key === 'object' ) {
+        attrs = key;
+        options = val;
+      }
+      // Handle GeoJSON argument.
+      if ( attrs && attrs.type && attrs.type === 'Feature' ) {
+        _attrs = _.clone( attrs.properties );
+        _attrs['geometry'] = _.clone( attrs.geometry );
+        return Backbone.Model.prototype.set.apply( this, [_attrs, options] );
+      } else {
+        return Backbone.Model.prototype.set.apply( this, arguments );
+      }
+    },
+
+    toJSON: function ( options ) {
+      var attrs, props, geometry;
+      attrs = _.clone( this.attributes );
+      props = _.omit( attrs, 'geometry' );
+      geometry = attrs['geometry'] || null;
+      return {
+        type: 'Feature',
+        properties: props,
+        geometry: geometry
+      };
+    }
 
   });
 
 
   // Default filter function to GeoJSON layer.
   var layerFilter = function ( feature, layer ) {
+    var model;
     if ( layer === this.layer ) {
-      var model = this._getModelByFeature( feature );
+      model = this._getModelByFeature( feature );
       this.modelFilter( model );
     }
   };
@@ -53,7 +85,7 @@
   // Backbone.Leaflet.GeoCollection
   // ------------------------------
 
-  // Extend Backbone.Collectio, adding georef support.
+  // Extend `Backbone.Collection`, adding georef support.
   var GeoCollection = Leaflet.GeoCollection = function ( models, options ) {
     // Accpets FeatureCollection GeoJSON as `models` param.
     if ( models && !_.isArray( models ) && models.features ) {
@@ -86,6 +118,8 @@
 
     },
 
+    // The GeoJSON representation of a `FeatureCollection`.
+    // http://www.geojson.org/geojson-spec.html#feature-collection-objects
     toJSON: function ( options ) {
       var features = Backbone.Collection.prototype.toJSON.apply( this,
                                                                  arguments );
@@ -131,10 +165,11 @@
 
     // Ensure that the collection has a `GeoJSON` layer.
     _ensureLayer: function () {
+      var methods;
       if ( !this.layer ) {
         this.layerOptions = _.defaults( this.options.layer || {},
                                         this.defaultLayerOptions );
-        var methods = ['filter', 'style'];
+        methods = ['filter', 'style'];
         _.each( methods, function ( method ) {
           this.layerOptions[method] = _.bind( this.layerOptions[method], this );
         }, this );

@@ -115,6 +115,7 @@
       it( 'should return GeoJSON', function () {
         var model = new Backbone.Leaflet.GeoModel( featureGeoJSON );
         var geoCollection = new Backbone.Leaflet.GeoCollection( [model] );
+        window.model = model;
         expect( geoCollection.toJSON() ).to.be.deep.equal( {
           type: 'FeatureCollection',
           features: [featureGeoJSON]
