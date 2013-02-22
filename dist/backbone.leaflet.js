@@ -2,8 +2,11 @@
 * http://github.com/LuizArmesto/backbone.leaflet
 * Copyright (c) 2013 Luiz Armesto; Licensed MIT */
 
-(function ( Backbone, /* Underscore */ _, /* jQuery */ $, /* Leaflet */ L ) {
+(function ( Backbone, _, L ) {
   "use strict";
+
+  // Get jQuery from Backbone.
+  var $ = Backbone.$;
 
   // The top-level namespace. All public classes will be attached to this.
   var Leaflet = {};
@@ -51,6 +54,8 @@
       }
     },
 
+    // The GeoJSON representation of a `Feature`.
+    // http://www.geojson.org/geojson-spec.html#feature-objects
     toJSON: function ( options ) {
       var attrs, props, geometry;
       attrs = _.clone( this.attributes );
@@ -65,6 +70,9 @@
 
   });
 
+
+  // Helper functions
+  // ----------------
 
   // Default filter function to GeoJSON layer.
   var layerFilter = function ( feature, layer ) {
@@ -306,4 +314,4 @@
 
   });
 
-}( Backbone, _, jQuery, L ));
+}( Backbone, _, L ));

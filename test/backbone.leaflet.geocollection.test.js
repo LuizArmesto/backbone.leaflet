@@ -44,8 +44,7 @@
       it( 'should allow inheritance', function () {
         var GeoCollection = Backbone.Leaflet.GeoCollection;
         expect( GeoCollection.extend ).to.be.equal( Backbone.Collection.extend );
-        // Should not override `initialize` function.
-        expect( GeoCollection.prototype.initialize ).to.be.equal( Backbone.Collection.prototype.initialize );
+        expect( GeoCollection.prototype.initialize ).to.be.equal( Backbone.Collection.prototype.initialize, 'should not override `initialize` function' );
       });
 
       it( 'should initialize `layer` property', function () {
@@ -115,7 +114,6 @@
       it( 'should return GeoJSON', function () {
         var model = new Backbone.Leaflet.GeoModel( featureGeoJSON );
         var geoCollection = new Backbone.Leaflet.GeoCollection( [model] );
-        window.model = model;
         expect( geoCollection.toJSON() ).to.be.deep.equal( {
           type: 'FeatureCollection',
           features: [featureGeoJSON]
