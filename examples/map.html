@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <title>Backbone.Leaflet Map Example</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="../lib/css/leaflet.css" />
+    <!--[if lte IE 8]>
+    <link rel="stylesheet" href="../lib/css/leaflet.ie.css" />
+    <![endif]-->
+    <style>
+      #map {
+        width: 700px;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Map Example</h1>
+    <div id="map"></div>
+    <div id="message"></div>
+    <script src="../lib/js/jquery.js"></script>
+    <script src="../lib/js/underscore.js"></script>
+    <script src="../lib/js/backbone.js"></script>
+    <script src="../lib/js/leaflet.js"></script>
+    <script src="../src/backbone.leaflet.js"></script>
+    <script>
+
+      // GeoJSON containing one point.
+      var geoJSON = {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [-46.6368, -23.5100]
+            },
+            properties: {}
+          },
+          {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [-46.6156, -23.5016]
+            },
+            properties: {}
+          }
+        ]
+      };
+
+      // Create a `GeoCollection` instance.
+      var geoCollection = new Backbone.Leaflet.GeoCollection( geoJSON );
+
+      // Create a `mapView` instance.
+      var mapView = new Backbone.Leaflet.MapView({
+        el: '#map',
+        collection: geoCollection
+      });
+
+      // Render the points
+      mapView.render();
+
+    </script>
+  </body>
+</html>
