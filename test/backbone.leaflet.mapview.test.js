@@ -5,6 +5,30 @@
 (function () {
   "use strict";
 
+  var featureGeoJSON = {
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [102.0, 0.5]
+    },
+    properties: {}
+  };
+
+  var featureA = _.clone( featureGeoJSON );
+  var featureB = _.clone( featureGeoJSON );
+
+  featureA.properties = { id: 1 };
+  featureB.properties = { id: 2 };
+
+  var featureCollectionGeoJSON = {
+    type: 'FeatureCollection',
+    features: [
+      featureA,
+      featureB
+    ]
+  };
+
+
   // MapView tests
   // -------------
   describe( 'MapView', function () {
@@ -55,6 +79,30 @@
     // ------------
     describe( 'Events', function () {
 
+      it( 'should listen collection events', function ( done ) {
+        var n = 0;
+        var geoCollection = new Backbone.Leaflet.GeoCollection();
+        var onEvent = function () {
+          if ( ++n === 3 ) {
+            done();
+          }
+        };
+        // Extend `MapView` to override callbacks.
+        var MyMapView = Backbone.Leaflet.MapView.extend({
+          _onReset: onEvent,
+          _onAdd: onEvent,
+          _onRemove: onEvent
+        });
+        this.mapView = new MyMapView({
+          collection: geoCollection
+        });
+
+        geoCollection.trigger( 'reset' );
+        geoCollection.trigger( 'add' );
+        geoCollection.trigger( 'remove' );
+
+      });
+
       it( 'should delegate map events', function ( done ) {
         var n = 0;
         // Extend `MapView` to handle events.
@@ -90,6 +138,50 @@
       it( 'should create a GeoJSON layer', function () {
         expect( this.mapView ).to.have.property( 'getLayer' );
         expect( this.mapView.getLayer() ).to.be.instanceOf( L.GeoJSON );
+        expect( this.mapView ).to.have.property( 'layer' );
+        expect( this.mapView.layer ).to.be.instanceOf( L.GeoJSON );
+      });
+
+      it( 'should has a empty layer if dont have collection', function () {
+        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 0 );
+      });
+
+      it( 'should add collection models to map', function () {
+        var geoCollection = new Backbone.Leaflet.GeoCollection( featureCollectionGeoJSON );
+        this.mapView = new Backbone.Leaflet.MapView({
+          collection: geoCollection
+        });
+        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( featureCollectionGeoJSON.features.length );
+      });
+
+      it( 'should add/remove objects to map when add/remove models to collection', function () {
+        var geoCollection = new Backbone.Leaflet.GeoCollection();
+        var model = new Backbone.Leaflet.GeoModel( featureGeoJSON );
+        this.mapView = new Backbone.Leaflet.MapView({
+          collection: geoCollection
+        });
+        // Verifies the number of layers objects to know if our model was added/removed.
+        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 0 );
+        geoCollection.add( model );
+        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 1 );
+        geoCollection.remove( model );
+        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 0 );
+      });
+
+      it( 'should not replace all map objects when add/remove new models to collection', function () {
+        var geoCollection = new Backbone.Leaflet.GeoCollection( featureCollectionGeoJSON );
+        var model = new Backbone.Leaflet.GeoModel( featureGeoJSON );
+        this.mapView = new Backbone.Leaflet.MapView({
+          collection: geoCollection
+        });
+        // Get the layers ids to future comparation.
+        var layersIds = _.keys( this.mapView.layer._layers );
+        // Add new model then verify if the other ids remains the same.
+        geoCollection.add( model );
+        expect( _.initial( _.keys( this.mapView.layer._layers ) ) ).to.be.deep.equal( layersIds);
+        // Remove our new model then verify if the ids list.
+        geoCollection.remove( model );
+        expect( _.keys( this.mapView.layer._layers ) ).to.be.deep.equal( layersIds );
       });
 
     });
@@ -104,18 +196,19 @@
       });
 
       it( 'should accept `filter` option', function () {
+        var that = this;
         var modelFake = {};
-        var mapView = new Backbone.Leaflet.MapView({
+        this.mapView = new Backbone.Leaflet.MapView({
           filter: function ( model ) {
             // Should receive the `modelFilter` arguments.
             expect( model ).to.be.equal( modelFake );
             // Should be binded.
-            expect( this ).to.be.equal( mapView );
+            expect( this ).to.be.equal( that.mapView );
             return false;
           }
         });
         // Should returns the return from `filter`function defined above.
-        expect( mapView.modelFilter( modelFake ) ).to.be.equal( false );
+        expect( this.mapView.modelFilter( modelFake ) ).to.be.equal( false );
       });
 
     });

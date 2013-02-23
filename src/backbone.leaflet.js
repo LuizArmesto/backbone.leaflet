@@ -26,6 +26,8 @@
     return this;
   };
 
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   // Backbone.Leaflet.GeoModel
   // -------------------------
@@ -36,20 +38,25 @@
     // Set a hash of model attributes on the object, firing `"change"` unless
     // you choose to silence it.
     set: function ( key, val, options ) {
-      var attrs, _attrs;
+      var args, attrs, _attrs, geometry;
+      args = arguments;
       // Handle both `"key", value` and `{key: value}` -style arguments.
       if ( typeof key === 'object' ) {
         attrs = key;
         options = val;
       }
       // Handle GeoJSON argument.
-      if ( attrs && attrs.type && attrs.type === 'Feature' ) {
-        _attrs = _.clone( attrs.properties );
-        _attrs['geometry'] = _.clone( attrs.geometry );
-        return Backbone.Model.prototype.set.apply( this, [_attrs, options] );
-      } else {
-        return Backbone.Model.prototype.set.apply( this, arguments );
+      if ( attrs && attrs['type'] && attrs['type'] === 'Feature' ) {
+        _attrs = _.clone( attrs['properties'] );
+        // Clone the geometry attribute.
+        geometry = _.clone( attrs['geometry'] ) || null;
+        if ( geometry ) {
+          geometry.coordinates = geometry['coordinates'].slice();
+        }
+        _attrs['geometry'] = geometry;
+        args = [_attrs, options];
       }
+      return Backbone.Model.prototype.set.apply( this, args );
     },
 
     // The GeoJSON representation of a `Feature`.
@@ -59,19 +66,26 @@
       options = options || {};
       attrs = _.clone( this.attributes );
       props = _.omit( attrs, 'geometry' );
+      // Add model cid to internal use.
       if ( options.cid ) {
         props.cid = this.cid;
       }
-      geometry = attrs['geometry'] || null;
+      // Clone the geometry attribute.
+      geometry = _.clone( attrs['geometry'] ) || null;
+      if ( geometry ) {
+        geometry.coordinates = geometry['coordinates'].slice();
+      }
       return {
         type: 'Feature',
-        properties: props,
-        geometry: geometry
+        geometry: geometry,
+        properties: props
       };
     }
 
   });
 
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   // Backbone.Leaflet.GeoCollection
   // ------------------------------
@@ -81,12 +95,16 @@
     // Default model.
     model: GeoModel,
 
+    // When you have more items than you want to add or remove individually,
+    // you can reset the entire set with a new list of models, without firing
+    // any `add` or `remove` events. Fires `reset` when finished.
     reset: function ( models, options ) {
       // Accpets FeatureCollection GeoJSON as `models` param.
       if ( models && !_.isArray( models ) && models.features ) {
         models = models.features;
       }
-      return Backbone.Collection.prototype.reset.apply( this, [models, options] );
+      return Backbone.Collection.prototype.reset.apply( this,
+                                                        [models, options] );
     },
 
     // The GeoJSON representation of a `FeatureCollection`.
@@ -102,6 +120,8 @@
 
   });
 
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   // Helper functions
   // ----------------
@@ -128,6 +148,8 @@
   // Cached regex to split keys for `delegate`.
   var delegateEventSplitter = /^(\S+)\s*(.*)$/;
 
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   // Backbone.Leaflet.MapView
   // ------------------------
@@ -137,18 +159,20 @@
   var MapView = Leaflet.MapView = function ( options ) {
     Backbone.View.apply( this, arguments );
     this.layers = {};
+    // Create a GeoJSON layer associated with the collection
+    this.layer = this.getLayer();
+    this.layer.addTo( this.map );
     if ( this.collection ) {
       if ( !this.collection instanceof GeoCollection ) {
-        throw new Error( 'The "collection" option should be instance of "GeoCollection" to be used within Map view' );
+        throw new Error( 'The "collection" option should be instance of ' +
+                         '"GeoCollection" to be used within Map view' );
       }
       this._ensureMap();
-      // Create a GeoJSON layer associated with the collection
-      this.collectionLayer = this.getLayer();
-      this.collectionLayer.addTo( this.map );
       // Bind Collection events.
-      this.listenTo( this.collection, 'reset', this.render );
+      this.listenTo( this.collection, 'reset', this._onReset );
       this.listenTo( this.collection, 'add', this._onAdd );
       this.listenTo( this.collection, 'remove', this._onRemove );
+      this.redraw();
     }
   };
 
@@ -180,14 +204,10 @@
       zoom: 14
     },
 
-    render: function () {
-      return this.redraw();
-    },
-
     redraw: function () {
       this.layers = {};
-      this.collectionLayer.clearLayers();
-      this.collectionLayer.addData( this.collection.toJSON({ cid: true }) );
+      this.layer.clearLayers();
+      this.layer.addData( this.collection.toJSON({ cid: true }) );
       return this;
     },
 
@@ -242,7 +262,12 @@
     getTileLayer: function () {
       return new L.TileLayer(
         'http:///{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png', {
-          attribution: 'Data, imagery and map information provided by <a href="http://www.mapquest.com/">MapQuest</a>, <a href="http://www.openstreetmap.org/">Open Street Map</a> and contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>.',
+          attribution: 'Data, imagery and map information provided by ' +
+                       '<a href="http://www.mapquest.com/">MapQuest</a>, ' +
+                       '<a href="http://www.openstreetmap.org/">' +
+                       'Open Street Map</a> and contributors, ' +
+                       '<a href="http://creativecommons.org/licenses/by-sa/2.0/">' +
+                       'CC-BY-SA</a>.',
           subdomains: [ 'otile1', 'otile2', 'otile3', 'otile4' ]
         }
       );
@@ -251,7 +276,8 @@
     // Ensure that the view has a `Leaflet` map object.
     _ensureMap: function () {
       if ( !this.map ) {
-        // Set the map options values. `options.map` accepts all `L.Map` options.
+        // Set the map options values. `options.map` accepts all `L.Map`
+        // options.
         // http://leafletjs.com/reference.html#map-constructor
         this.mapOptions = _.defaults( this.options.map || {},
                                       this.defaultMapOptions );
@@ -301,7 +327,8 @@
 
     // Returns the Backbone Model associated to the Leaflet Feature received.
     _getModelByFeature: function ( feature ) {
-      var models = _.where( this.collection.models, {cid: feature.properties.cid} );
+      var models = _.where( this.collection.models,
+                            {cid: feature.properties.cid} );
       return models[0];
     },
 
@@ -318,21 +345,28 @@
     },
 
     // Add to map the model added to collection
+    _onReset: function () {
+      this.redraw();
+    },
+
+    // Add to map the model added to collection
     _onAdd: function ( model ) {
-      this.collectionLayer.addData( model.toJSON({ cid: true }) );
+      this.layer.addData( model.toJSON({ cid: true }) );
     },
 
     // Remove from map the model removed from collection
     _onRemove: function ( model ) {
       var layer = this.layers[model.cid];
       if ( layer ) {
-        this.collectionLayer.removeLayer( layer );
+        this.layer.removeLayer( layer );
         this.layers[model.cid] = null;
       }
     }
 
   });
 
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   // Backbone.Leaflet.SatelliteView
   // ------------------------------
@@ -352,7 +386,10 @@
     getTileLayer: function () {
       return new L.TileLayer(
         'http:///{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg', {
-        attribution: 'Data and imagery provided by <a href="http://www.mapquest.com/">MapQuest</a>. Portions Courtesy NASA/JPL-Caltech and U.S. Depart. of Agriculture, Farm Service Agency.',
+        attribution: 'Data and imagery provided by ' +
+                     '<a href="http://www.mapquest.com/">MapQuest</a>. ' +
+                     'Portions Courtesy NASA/JPL-Caltech and ' +
+                     'U.S. Depart. of Agriculture, Farm Service Agency.',
           subdomains: [ 'otile1', 'otile2', 'otile3', 'otile4' ]
         }
       );
