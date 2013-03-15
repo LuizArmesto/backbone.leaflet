@@ -2,22 +2,69 @@
 
 [![Continuous Integration status](https://secure.travis-ci.org/LuizArmesto/backbone.leaflet.png)](http://travis-ci.org/LuizArmesto/backbone.leaflet)
 
-*(Disclaimer: This project is not usable yet!)*
+*(Disclaimer: This project is in an early development stage. It is not intended to be used in production yet!)*
 
 
 ## Backbone.Leaflet.GeoModel
 
-*TODO*
+The `GeoModel` is a [Backbone Model](http://backbonejs.org/#Model) to work with [GeoJSON](http://geojson.org/).
 
+When using `GeoModel` the method `toJSON` will return a JSON object following the [GeoJSON format specification](http://geojson.org/geojson-spec.html). On the other hand you can use either a common JSON or a [GeoJSON object with the type "Feature"](http://geojson.org/geojson-spec.html#feature-objects) as an input data. All other methods works as in ordinary Backbone's model.
+
+### Creating a `GeoModel` instance
+
+```javascript
+var geojsonFeature = {
+  "type": "Feature",
+  "properties": {
+    "name": "Coors Field",
+    "amenity": "Baseball Stadium",
+    "popupContent": "This is where the Rockies play!"
+  },
+  "geometry": {
+    "type": "Point",
+    "coordinates": [-104.99404, 39.75621]
+  }
+};
+
+var geoModel = new Backbone.Leaflet.GeoModel( geojsonFeature );
+
+```
 
 ## Backbone.Leaflet.GeoCollection
 
-*TODO*
+The `GeoCollection` is a [Backbone Collection](http://backbonejs.org/#Collection) to work with GeoJSON and `GeoModel`. You can create a new collection using either an array of `GeoModels` or a [GeoJSON object with the type "FeatureCollection"](http://geojson.org/geojson-spec.html#feature-collection-objects). The `toJSON` method will return a GeoJSON object.
 
+### Creating a `GeoCollection` instance
+
+```javascript
+var geojsonFeatureCollection = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-46.6368, -23.5100]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-46.6156, -23.5016]
+      }
+    }
+  ]
+};
+
+var geoCollection = new Backbone.Leaflet.GeoCollection( geojsonFeatureCollection );
+
+```
 
 ## Backbone.Leaflet.MapView
 
-The `MapView` is a [Backbone View](http://backbonejs.org/#View) to display `GeoCollection` and `GeoModel` on [Leaflet](http://leafletjs.com/) map, using [MapQuest-OSM](http://developer.mapquest.com/web/products/open/map) tiles.
+The `MapView` is a [Backbone View](http://backbonejs.org/#View) to display `GeoCollection` and `GeoModel` on [Leaflet](http://leafletjs.com/) map using [MapQuest-OSM](http://developer.mapquest.com/web/products/open/map) tiles.
 
 
 ### Creating a simple map
@@ -28,6 +75,8 @@ Use `MapView` just like any other `Backbone` view.
 var mapView = new Backbone.Leaflet.MapView({
 
   el: '#map',
+
+  collection: geoCollection,  // See above how to create a `GeoCollection` instance.
 
   map: {
     ...  // Leaflet map options (optional).
