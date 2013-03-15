@@ -7,9 +7,18 @@
     <link rel="stylesheet" href="../lib/css/leaflet.ie.css" />
     <![endif]-->
     <style>
+      #geoJSON,
       #map {
         width: 700px;
+      }
+      #map {
         height: 400px;
+      }
+      #geoJSON {
+        height: 150px;
+      }
+      #render {
+        padding: 10px;
       }
     </style>
   </head>
@@ -17,6 +26,31 @@
     <h1>Map Example</h1>
     <div id="map"></div>
     <div id="message"></div>
+    <textarea id="geoJSON">
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-46.6368, -23.5100]
+      },
+      "properties": {}
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-46.6156, -23.5016]
+      },
+      "properties": {}
+    }
+  ]
+}
+    </textarea>
+    <br />
+    <button id="render">Render</button>
     <script src="../lib/js/jquery.js"></script>
     <script src="../lib/js/underscore.js"></script>
     <script src="../lib/js/backbone.js"></script>
@@ -24,37 +58,22 @@
     <script src="../src/backbone.leaflet.js"></script>
     <script>
 
-      // GeoJSON containing one point.
-      var geoJSON = {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [-46.6368, -23.5100]
-            },
-            properties: {}
-          },
-          {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [-46.6156, -23.5016]
-            },
-            properties: {}
-          }
-        ]
-      };
-
       // Create a `GeoCollection` instance.
-      var geoCollection = new Backbone.Leaflet.GeoCollection( geoJSON );
+      var geoCollection = new Backbone.Leaflet.GeoCollection();
+
+      // This isn't the backbone way, but we want to keep this example
+      // as simple as possible.
+      $( '#render' ).click( function () {
+        geoCollection.reset( JSON.parse( $( '#geoJSON' ).val() ) );
+      });
 
       // Create a `mapView` instance.
       var mapView = new Backbone.Leaflet.MapView({
         el: '#map',
         collection: geoCollection
       });
+
+      $( '#render' ).click();
 
     </script>
   </body>
