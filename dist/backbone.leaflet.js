@@ -1,4 +1,4 @@
-/*! backbone.leaflet - v0.0.1-dev - 2/22/2013
+/*! backbone.leaflet - v0.0.1-dev - 3/14/2013
 * http://github.com/LuizArmesto/backbone.leaflet
 * Copyright (c) 2013 Luiz Armesto; Licensed MIT */
 
@@ -49,7 +49,7 @@
       }
       // Handle GeoJSON argument.
       if ( attrs && attrs['type'] && attrs['type'] === 'Feature' ) {
-        _attrs = _.clone( attrs['properties'] );
+        _attrs = _.clone( attrs['properties'] ) || {};
         // Clone the geometry attribute.
         geometry = _.clone( attrs['geometry'] ) || null;
         if ( geometry ) {

@@ -47,7 +47,7 @@
       }
       // Handle GeoJSON argument.
       if ( attrs && attrs['type'] && attrs['type'] === 'Feature' ) {
-        _attrs = _.clone( attrs['properties'] );
+        _attrs = _.clone( attrs['properties'] ) || {};
         // Clone the geometry attribute.
         geometry = _.clone( attrs['geometry'] ) || null;
         if ( geometry ) {

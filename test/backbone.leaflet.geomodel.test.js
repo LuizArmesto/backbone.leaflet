@@ -48,6 +48,12 @@
         expect( this.geoModel ).to.be.instanceOf( Backbone.Model );
       });
 
+      it( 'should allow null JSON object as `properties` value', function () {
+        var featureGeoJSON_ = _.clone( featureGeoJSON );
+        featureGeoJSON_.properties = null;
+        var geoModel = new Backbone.Leaflet.GeoModel( featureGeoJSON_ );
+      });
+
     });
 
     // Backbone functions tests
