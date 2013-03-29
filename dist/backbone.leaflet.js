@@ -1,4 +1,4 @@
-/*! backbone.leaflet - v0.0.1-dev - 3/14/2013
+/*! backbone.leaflet - v0.0.1-dev - 3/29/2013
 * http://github.com/LuizArmesto/backbone.leaflet
 * Copyright (c) 2013 Luiz Armesto; Licensed MIT */
 
@@ -141,9 +141,10 @@
     this.modelStyle( model );
   };
 
-  // Default style function to GeoJSON layer.
+  // Associates Backbone model and GeoJSON layer.
   var layerOnEachFeature = function ( feature, layer ) {
     this.layers[feature.properties.cid] = layer;
+    layer._bbModelCid = feature.properties.cid;
   };
 
 
@@ -162,7 +163,7 @@
     Backbone.View.apply( this, arguments );
     this.layers = {};
     // Create a GeoJSON layer associated with the collection
-    this.layer = this.getLayer();
+    this.layer = this._getLayer();
     this.layer.addTo( this.map );
     if ( this.collection ) {
       if ( !this.collection instanceof GeoCollection ) {
@@ -228,6 +229,7 @@
       }
       this._leaflet_events = {};
       for ( var key in events ) {
+        // Get the callback method.
         var method = events[key];
         if ( !_.isFunction( method ) ) {
           method = this[events[key]];
@@ -254,6 +256,7 @@
     // `delegateEvents`, then call `undelegateEvents` from `Backbone.View`.
     undelegateEvents: function () {
       var context = 'delegateEvents' + this.cid;
+      // Clear the map events.
       this.map.off( this._leaflet_events || {}, context );
       this._leaflet_events = null;
       return Backbone.View.prototype.undelegateEvents.apply( this, arguments );
@@ -335,7 +338,7 @@
     },
 
     // Ensure that the collection has a `GeoJSON` layer.
-    getLayer: function () {
+    _getLayer: function () {
       var methods, layerOptions;
       layerOptions = _.defaults( this.options.layer || {},
                                  this.defaultLayerOptions );

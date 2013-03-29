@@ -136,8 +136,8 @@
     describe( 'Leaflet integration', function () {
 
       it( 'should create a GeoJSON layer', function () {
-        expect( this.mapView ).to.have.property( 'getLayer' );
-        expect( this.mapView.getLayer() ).to.be.instanceOf( L.GeoJSON );
+        expect( this.mapView ).to.have.property( '_getLayer' );
+        expect( this.mapView._getLayer() ).to.be.instanceOf( L.GeoJSON );
         expect( this.mapView ).to.have.property( 'layer' );
         expect( this.mapView.layer ).to.be.instanceOf( L.GeoJSON );
       });
