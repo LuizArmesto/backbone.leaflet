@@ -90,14 +90,15 @@ For more informations about map options see the [Leaflet documentation](http://l
 
 ### Delegating map events
 
-To delegate map events just define the `events` property like you usually do but use "map" as selector to `Leaflet` map events.
+To delegate map events just define the `events` property like you usually do but use "map" as selector to `Leaflet` map events. To delegate "features" (marks, polygons, etc) events use "feature" as selector.
 
 ```javascript
 var MyMapView = Backbone.Leaflet.MapView.extend({
 
   events: {
     'click map': 'onClick',
-    'move map': 'onMove'
+    'move map': 'onMove',
+    'click feature', 'onFeatureClick'
   },
 
   onClick: function ( evt ) {
@@ -105,6 +106,15 @@ var MyMapView = Backbone.Leaflet.MapView.extend({
   },
 
   onMove: function ( evt ) {
+    ...
+  },
+
+  onFeatureClick: function ( evt ) {
+    // Get the Leaflet "feature" object.
+    var feature = evt.target;
+    // Get the Backbone model associated to the "feature".
+    var model = this.collection.get( feature );
+
     ...
   }
 

@@ -144,7 +144,17 @@
   // Associates Backbone model and GeoJSON layer.
   var layerOnEachFeature = function ( feature, layer ) {
     this.layers[feature.properties.cid] = layer;
-    layer._bbModelCid = feature.properties.cid;
+    // Add cid to layer object to associate it with the backbone model instance.
+    layer.cid = feature.properties.cid;
+    // Proxy layer events.
+    var layerEvents = ['click'];
+    var that = this;
+    _.each( layerEvents, function ( eventName ) {
+      layer.on(eventName, function ( e ) {
+        var map = layer._map;
+        map.fire.apply( map, ['feature_' + eventName].concat( arguments ) );
+      });
+    });
   };
 
 
@@ -227,6 +237,12 @@
       if ( !( events || ( events = _.result( this, 'events' ) ) ) ) {
         return this;
       }
+      var featureCallback = function ( method ) {
+        return function ( e ) {
+          var origEvent = e[0];
+          method( origEvent );
+        };
+      };
       this._leaflet_events = {};
       for ( var key in events ) {
         // Get the callback method.
@@ -243,7 +259,11 @@
         method = _.bind( method, this );
 
         // Now we bind events with `map` selector to `Leaflet` map.
-        if ( selector === 'map') {
+        if ( selector === 'map' || selector === 'feature' ) {
+          if ( selector === 'feature' ) {
+            eventName = 'feature_' + eventName;
+            method = featureCallback( method );
+          }
           this.map.on( eventName, method, context );
           // Save the callbacks references to use to undelegate the events.
           this._leaflet_events[eventName] = method;

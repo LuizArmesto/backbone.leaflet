@@ -129,6 +129,29 @@
         myMapView.remove();
       });
 
+      it( 'should delegate features events', function ( done ) {
+        var n = 0;
+        // Extend `MapView` to handle events.
+        var MyMapView = Backbone.Leaflet.MapView.extend({
+          events: {
+            'click feature': 'onEvent'
+          },
+          onEvent: function ( e ) {
+            expect( e ).to.be.equal( 'original event' );
+            if ( ++n === 1 ) {
+              done();
+            }
+          }
+        });
+        // Instanciate MyMapView
+        var myMapView = new MyMapView();
+        // Fire map events
+        myMapView.map.fire( 'feature_click', { 0: 'original event' } );
+        // Clear `MyMapView` instance.
+        myMapView.remove();
+      });
+
+
     });
 
     // Leaflet integration tests
@@ -166,6 +189,18 @@
         expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 1 );
         geoCollection.remove( model );
         expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 0 );
+      });
+
+      it( 'should associate the backbone model to the leaflet feature object', function () {
+        var geoCollection = new Backbone.Leaflet.GeoCollection();
+        var model = new Backbone.Leaflet.GeoModel( featureGeoJSON );
+        this.mapView = new Backbone.Leaflet.MapView({
+          collection: geoCollection
+        });
+        geoCollection.add( model );
+        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 1 );
+        expect( _.values( this.mapView.layer._layers )[0] ).to.have.property( 'cid' );
+        expect( _.values( this.mapView.layer._layers )[0].cid ).to.be.equal( model.cid );
       });
 
       it( 'should not replace all map objects when add/remove new models to collection', function () {
