@@ -87,7 +87,8 @@
       // Create a `mapView` instance.
       var mapView = new Backbone.Leaflet.MapView({
         el: '#map',
-        collection: geoCollection
+        collection: geoCollection,
+        style: { fillColor: 'green', color: 'green' }
       });
 
       $( '#render' ).click();
