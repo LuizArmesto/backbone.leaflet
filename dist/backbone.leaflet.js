@@ -1,4 +1,4 @@
-/*! backbone.leaflet - v0.0.1-dev - 3/29/2013
+/*! backbone.leaflet - v0.0.1-dev - 3/30/2013
 * http://github.com/LuizArmesto/backbone.leaflet
 * Copyright (c) 2013 Luiz Armesto; Licensed MIT */
 
@@ -147,12 +147,12 @@
     // Add cid to layer object to associate it with the backbone model instance.
     layer.cid = feature.properties.cid;
     // Proxy layer events.
-    var layerEvents = ['click'];
+    var layerEvents = ['click', 'mouseover'];
     var that = this;
     _.each( layerEvents, function ( eventName ) {
       layer.on(eventName, function ( e ) {
         var map = layer._map;
-        map.fire.apply( map, ['feature_' + eventName].concat( arguments ) );
+        map.fire.apply( map, ['layer_' + eventName].concat( arguments ) );
       });
     });
   };
@@ -259,9 +259,9 @@
         method = _.bind( method, this );
 
         // Now we bind events with `map` selector to `Leaflet` map.
-        if ( selector === 'map' || selector === 'feature' ) {
-          if ( selector === 'feature' ) {
-            eventName = 'feature_' + eventName;
+        if ( selector === 'map' || selector === 'layer' ) {
+          if ( selector === 'layer' ) {
+            eventName = 'layer_' + eventName;
             method = featureCallback( method );
           }
           this.map.on( eventName, method, context );

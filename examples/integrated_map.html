@@ -151,7 +151,7 @@
         // Bind `map`events using `map` as selector.
         events: {
           'click map': 'onClick',
-          'click feature': 'onFeatureClick'
+          'click layer': 'onLayerClick'
         },
 
         // Creates new point when user click on map.
@@ -167,10 +167,10 @@
           this.collection.add( geoModel );
         },
 
-        onFeatureClick: function ( e ) {
-          var feature = e.target;
-          var model = this.collection.get( feature );
-          feature.bindPopup( model.get( 'name' ) ).openPopup();
+        onLayerClick: function ( e ) {
+          var layer = e.target;
+          var model = this.collection.get( layer );
+          layer.bindPopup( model.get( 'name' ) ).openPopup();
         }
       });
 

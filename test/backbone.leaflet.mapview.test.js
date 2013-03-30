@@ -103,55 +103,6 @@
 
       });
 
-      it( 'should delegate map events', function ( done ) {
-        var n = 0;
-        // Extend `MapView` to handle events.
-        var MyMapView = Backbone.Leaflet.MapView.extend({
-          events: {
-            'click map': 'onEvent',
-            'move map': 'onEvent'
-          },
-          onEvent: function ( e ) {
-            expect( e ).to.have.property( 'type' );
-            expect( e ).to.have.property( 'target' );
-            expect( e.target ).to.be.equal( this.map );
-            if ( ++n === 2 ) {
-              done();
-            }
-          }
-        });
-        // Instanciate MyMapView
-        var myMapView = new MyMapView();
-        // Fire map events
-        myMapView.map.fire( 'click' );
-        myMapView.map.fire( 'move' );
-        // Clear `MyMapView` instance.
-        myMapView.remove();
-      });
-
-      it( 'should delegate features events', function ( done ) {
-        var n = 0;
-        // Extend `MapView` to handle events.
-        var MyMapView = Backbone.Leaflet.MapView.extend({
-          events: {
-            'click feature': 'onEvent'
-          },
-          onEvent: function ( e ) {
-            expect( e ).to.be.equal( 'original event' );
-            if ( ++n === 1 ) {
-              done();
-            }
-          }
-        });
-        // Instanciate MyMapView
-        var myMapView = new MyMapView();
-        // Fire map events
-        myMapView.map.fire( 'feature_click', { 0: 'original event' } );
-        // Clear `MyMapView` instance.
-        myMapView.remove();
-      });
-
-
     });
 
     // Leaflet integration tests
@@ -218,6 +169,61 @@
         geoCollection.remove( model );
         expect( _.keys( this.mapView.layer._layers ) ).to.be.deep.equal( layersIds );
       });
+
+      it( 'should delegate map events', function ( done ) {
+        var n = 0;
+        // Extend `MapView` to handle events.
+        var MyMapView = Backbone.Leaflet.MapView.extend({
+          events: {
+            'click map': 'onEvent',
+            'move map': 'onEvent'
+          },
+          onEvent: function ( e ) {
+            expect( e ).to.have.property( 'type' );
+            expect( e ).to.have.property( 'target' );
+            expect( e.target ).to.be.equal( this.map );
+            if ( ++n === 2 ) {
+              done();
+            }
+          }
+        });
+        // Instanciate MyMapView
+        var myMapView = new MyMapView();
+        // Fire map events
+        myMapView.map.fire( 'click' );
+        myMapView.map.fire( 'move' );
+        // Clear `MyMapView` instance.
+        myMapView.remove();
+      });
+
+      it( 'should delegate layers events', function ( done ) {
+        var n = 0;
+        var geoCollection = new Backbone.Leaflet.GeoCollection( featureCollectionGeoJSON );
+        var model = new Backbone.Leaflet.GeoModel( featureGeoJSON );
+        // Extend `MapView` to handle events.
+        var MyMapView = Backbone.Leaflet.MapView.extend({
+          events: {
+            'click layer': 'onEvent',
+            'mouseover layer': 'onEvent'
+          },
+          onEvent: function ( e ) {
+            if ( ++n === 2 ) {
+              done();
+            }
+          }
+        });
+        // Instanciate MyMapView
+        var myMapView = new MyMapView({
+          collection: geoCollection
+        });
+        // Add new model then verify if the other ids remains the same.
+        geoCollection.add( model );
+        // Fire map events
+        _.values( myMapView.layer._layers )[0].fire( 'click' ).fire( 'mouseover' );
+        // Clear `MyMapView` instance.
+        myMapView.remove();
+      });
+
 
     });
 
