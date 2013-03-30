@@ -4,6 +4,12 @@
 
 *(Disclaimer: This project is in an early development stage. It is not intended to be used in production yet!)*
 
+_Backbone.Leaflet_ is a [Backbone](http://backbonejs.org/) plugin designed to work with geospatial data using [GeoJSON](http://geojson.org) specification. This provides an extended model (`Backbone.Leaflet.GeoModel`) and an extended collection (`Backbone.Leaflet.GeoCollection`) that accepts and exports GeoJSON data and a couple of views (`Backbone.Leaflet.MapView` and `Backbone.Leaflet.SatelliteView`) to display `GeoModel` instances in a map, using [Leaflet](http://leafletjs.com).
+
+Dependencies:
+ * [Backbone 1.0.0](http://backbonejs.org/#downloads) and it dependencies
+ * [Leaflet 0.5.1](http://leafletjs.com/download.html)
+
 
 ## Backbone.Leaflet.GeoModel
 

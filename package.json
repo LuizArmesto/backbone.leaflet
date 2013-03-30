@@ -22,16 +22,10 @@
   ],
   "preferGlobal": true,
   "dependencies": {
-    "backbone": "~0.9.10",
-    "underscore": "1.4.4",
-    "leaflet-engine": "0.4.5"
   },
   "devDependencies": {
     "grunt-mocha" : "~0.1.7",
-    "grunt": "~0.3.0",
-    "backbone": "~0.9.10",
-    "underscore": "1.4.4",
-    "leaflet-engine": "0.4.5"
+    "grunt": "~0.3.0"
   },
   "keywords": [
       "backbone",

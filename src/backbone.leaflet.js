@@ -1,4 +1,4 @@
-/*globals Backbone:true, _:true, jQuery:true, L:true, window:true*/
+/*globals Backbone:true, _:true, L:true, window:true*/
 
 (function ( Backbone, _, L ) {
   "use strict";
