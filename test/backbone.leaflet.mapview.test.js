@@ -112,12 +112,12 @@
       it( 'should create a GeoJSON layer', function () {
         expect( this.mapView ).to.have.property( '_getLayer' );
         expect( this.mapView._getLayer() ).to.be.instanceOf( L.GeoJSON );
-        expect( this.mapView ).to.have.property( 'layer' );
-        expect( this.mapView.layer ).to.be.instanceOf( L.GeoJSON );
+        expect( this.mapView ).to.have.property( '_layer' );
+        expect( this.mapView._layer ).to.be.instanceOf( L.GeoJSON );
       });
 
       it( 'should has a empty layer if dont have collection', function () {
-        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 0 );
+        expect( _.keys( this.mapView._layer._layers ).length ).to.be.equal( 0 );
       });
 
       it( 'should add collection models to map', function () {
@@ -125,7 +125,7 @@
         this.mapView = new Backbone.Leaflet.MapView({
           collection: geoCollection
         });
-        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( featureCollectionGeoJSON.features.length );
+        expect( _.keys( this.mapView._layer._layers ).length ).to.be.equal( featureCollectionGeoJSON.features.length );
       });
 
       it( 'should add/remove objects to map when add/remove models to collection', function () {
@@ -135,11 +135,11 @@
           collection: geoCollection
         });
         // Verifies the number of layers objects to know if our model was added/removed.
-        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 0 );
+        expect( _.keys( this.mapView._layer._layers ).length ).to.be.equal( 0 );
         geoCollection.add( model );
-        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 1 );
+        expect( _.keys( this.mapView._layer._layers ).length ).to.be.equal( 1 );
         geoCollection.remove( model );
-        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 0 );
+        expect( _.keys( this.mapView._layer._layers ).length ).to.be.equal( 0 );
       });
 
       it( 'should associate the backbone model to the leaflet feature object', function () {
@@ -149,9 +149,9 @@
           collection: geoCollection
         });
         geoCollection.add( model );
-        expect( _.keys( this.mapView.layer._layers ).length ).to.be.equal( 1 );
-        expect( _.values( this.mapView.layer._layers )[0] ).to.have.property( 'cid' );
-        expect( _.values( this.mapView.layer._layers )[0].cid ).to.be.equal( model.cid );
+        expect( _.keys( this.mapView._layer._layers ).length ).to.be.equal( 1 );
+        expect( _.values( this.mapView._layer._layers )[0] ).to.have.property( 'cid' );
+        expect( _.values( this.mapView._layer._layers )[0].cid ).to.be.equal( model.cid );
       });
 
       it( 'should not replace all map objects when add/remove new models to collection', function () {
@@ -161,13 +161,13 @@
           collection: geoCollection
         });
         // Get the layers ids to future comparation.
-        var layersIds = _.keys( this.mapView.layer._layers );
+        var layersIds = _.keys( this.mapView._layer._layers );
         // Add new model then verify if the other ids remains the same.
         geoCollection.add( model );
-        expect( _.initial( _.keys( this.mapView.layer._layers ) ) ).to.be.deep.equal( layersIds);
+        expect( _.initial( _.keys( this.mapView._layer._layers ) ) ).to.be.deep.equal( layersIds);
         // Remove our new model then verify if the ids list.
         geoCollection.remove( model );
-        expect( _.keys( this.mapView.layer._layers ) ).to.be.deep.equal( layersIds );
+        expect( _.keys( this.mapView._layer._layers ) ).to.be.deep.equal( layersIds );
       });
 
       it( 'should delegate map events', function ( done ) {
@@ -219,7 +219,7 @@
         // Add new model then verify if the other ids remains the same.
         geoCollection.add( model );
         // Fire map events
-        _.values( myMapView.layer._layers )[0].fire( 'click' ).fire( 'mouseover' );
+        _.values( myMapView._layer._layers )[0].fire( 'click' ).fire( 'mouseover' );
         // Clear `MyMapView` instance.
         myMapView.remove();
       });

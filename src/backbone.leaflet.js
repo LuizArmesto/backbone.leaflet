@@ -126,22 +126,27 @@
   // Helper functions
   // ----------------
 
+  // Default pointToLayer function to GeoJSON layer.
+  var layerPointToLayer = function ( feature, latLng ) {
+    var model = this._getModelByFeature( feature );
+    return new L.Marker( latLng, this.modelStyle( model ) );
+  };
+
   // Default filter function to GeoJSON layer.
   var layerFilter = function ( feature, layer ) {
-    var model;
-    model = this._getModelByFeature( feature );
+    var model = this._getModelByFeature( feature );
     return this.modelFilter( model );
   };
 
   // Default style function to GeoJSON layer.
   var layerStyle = function ( feature ) {
     var model = this._getModelByFeature( feature );
-    this.modelStyle( model );
+    return this.modelStyle( model );
   };
 
   // Associates Backbone model and GeoJSON layer.
   var layerOnEachFeature = function ( feature, layer ) {
-    this.layers[feature.properties.cid] = layer;
+    this._layers[feature.properties.cid] = layer;
     // Add cid to layer object to associate it with the backbone model instance.
     layer.cid = feature.properties.cid;
     // Proxy layer events.
@@ -169,10 +174,10 @@
   // `Backbone.Leaflet.GeoCollection` instances on map.
   var MapView = Leaflet.MapView = function ( options ) {
     Backbone.View.apply( this, arguments );
-    this.layers = {};
+    this._layers = {};
     // Create a GeoJSON layer associated with the collection
-    this.layer = this._getLayer();
-    this.layer.addTo( this.map );
+    this._layer = this._getLayer();
+    this._layer.addTo( this.map );
     if ( this.collection ) {
       if ( !this.collection instanceof GeoCollection ) {
         throw new Error( 'The "collection" option should be instance of ' +
@@ -183,6 +188,7 @@
       this.listenTo( this.collection, 'reset', this._onReset );
       this.listenTo( this.collection, 'add', this._onAdd );
       this.listenTo( this.collection, 'remove', this._onRemove );
+      this.listenTo( this.collection, 'change', this._onChange );
       this.redraw();
     }
   };
@@ -195,6 +201,7 @@
     // Default options used to create the Leaflet map.
     // See http://leafletjs.com/reference.html#geojson-options
     defaultLayerOptions: {
+      pointToLayer: layerPointToLayer,
       filter: layerFilter,
       style: layerStyle,
       onEachFeature: layerOnEachFeature
@@ -216,9 +223,9 @@
     },
 
     redraw: function () {
-      this.layers = {};
-      this.layer.clearLayers();
-      this.layer.addData( this.collection.toJSON({ cid: true }) );
+      this._layers = {};
+      this._layer.clearLayers();
+      this._layer.addData( this.collection.toJSON({ cid: true }) );
       return this;
     },
 
@@ -326,7 +333,7 @@
         return this.options.filter.apply( this, arguments );
       }
       // Don't allow duplicated points for the same model
-      return !this.layers[model.cid];
+      return !this._layers[model.cid];
     },
 
     // Function that will be used to get style options for vector layers
@@ -360,7 +367,7 @@
       var methods, layerOptions;
       layerOptions = _.defaults( this.options.layer || {},
                                  this.defaultLayerOptions );
-      methods = ['filter', 'style', 'onEachFeature'];
+      methods = ['pointToLayer', 'filter', 'style', 'onEachFeature'];
       _.each( methods, function ( method ) {
         layerOptions[method] = _.bind( layerOptions[method], this );
       }, this );
@@ -374,15 +381,42 @@
 
     // Add to map the model added to collection
     _onAdd: function ( model ) {
-      this.layer.addData( model.toJSON({ cid: true }) );
+      this._layer.addData( model.toJSON({ cid: true }) );
     },
 
     // Remove from map the model removed from collection
     _onRemove: function ( model ) {
-      var layer = this.layers[model.cid];
+      var layer = this._layers[model.cid];
       if ( layer ) {
-        this.layer.removeLayer( layer );
-        this.layers[model.cid] = null;
+        this._layer.removeLayer( layer );
+        this._layers[model.cid] = null;
+      }
+    },
+
+    // Update the map layer
+    _onChange: function ( model ) {
+      // FIXME: Write some tests.
+      var newStyle;
+      var layer = this._layers[model.cid];
+      if ( model.hasChanged( 'geometry' ) ) {
+        // The geometry has been changed so we need to create new layer
+        this._onRemove( model );  // Removes the old layer
+        this._onAdd( model );     // Creates new updated layer
+      } else {
+        newStyle = this.modelStyle( model );
+        if ( layer.setStyle && _.isFunction( layer.setStyle ) ) {
+          // We have a path layer
+          layer.setStyle( newStyle );
+        } else if ( ( layer.setIcon && _.isFunction( layer.setIcon ) ) &&
+                    ( layer.setOpacity && _.isFunction( layer.setOpacity ) ) ) {
+          // We have a marker
+          if ( newStyle.icon ) {
+            layer.setIcon( newStyle.icon );
+          }
+          if ( newStyle.opacity ) {
+            layer.setOpacity( newStyle.opacity );
+          }
+        }
       }
     }
 
