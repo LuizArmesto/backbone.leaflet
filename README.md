@@ -4,9 +4,11 @@
 
 *(Disclaimer: This project is in an early development stage. It is not intended to be used in production yet!)*
 
-_Backbone.Leaflet_ is a [Backbone](http://backbonejs.org/) plugin designed to work with geospatial data using [GeoJSON](http://geojson.org) specification. This provides an extended model (`Backbone.Leaflet.GeoModel`) and an extended collection (`Backbone.Leaflet.GeoCollection`) that accepts and exports GeoJSON data and a couple of views (`Backbone.Leaflet.MapView` and `Backbone.Leaflet.SatelliteView`) to display `GeoModel` instances in a map, using [Leaflet](http://leafletjs.com).
+__Backbone.Leaflet__ is a [Backbone](http://backbonejs.org/) plugin designed to work with geospatial data using [GeoJSON](http://geojson.org) specification. This provides an extended model (`Backbone.Leaflet.GeoModel`) and an extended collection (`Backbone.Leaflet.GeoCollection`) that accepts and exports GeoJSON data and a couple of views (`Backbone.Leaflet.MapView` and `Backbone.Leaflet.SatelliteView`) to display `GeoModel` instances in a map, using [Leaflet](http://leafletjs.com).
 
-Dependencies:
+You should be familiar with both Backbone and Leaflet to get the best use out of this plugin.
+
+__Dependencies__:
  * [Backbone 1.0.0](http://backbonejs.org/#downloads) and it dependencies
  * [Leaflet 0.5.1](http://leafletjs.com/download.html)
 
@@ -96,7 +98,7 @@ For more informations about map options see the [Leaflet documentation](http://l
 
 ### Delegating map events
 
-To delegate map events just define the `events` property like you usually do but use "map" as selector to `Leaflet` map events. To delegate [`Layers`](http://leafletjs.com/reference.html#ilayer) (markers, polygons, etc) events use "layer" as selector.
+To delegate map events just define the `events` property like you usually do but use _"map"_ as selector to `Leaflet` map events. To delegate [Layers](http://leafletjs.com/reference.html#ilayer) (markers, polygons, etc) events use _"layer"_ as selector.
 
 ```javascript
 var MyMapView = Backbone.Leaflet.MapView.extend({
@@ -130,7 +132,7 @@ var myMapView = new MyMapView({
 
 ```
 
-For more informations about `Leaflet`events see the [map events reference](http://leafletjs.com/reference.html#map-events).
+For more informations about Leaflet events see the [map events reference](http://leafletjs.com/reference.html#map-events).
 
 
 ## Backbone.Leaflet.SatelliteView
@@ -141,7 +143,7 @@ The `SatelliteView` works similar to `MapView`, except that uses [MapQuest Open 
 ## Contributing
 Indent your code with 2 spaces, strip trailing whitespace and take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using grunt.
 
-Also, please don't edit files in the "dist" subdirectory as they are generated via grunt. You'll find source code in the "src" subdirectory!
+Also, please don't edit files in the _"dist"_ subdirectory as they are generated via grunt. You'll find source code in the _"src"_ subdirectory!
 
 
 ## License
