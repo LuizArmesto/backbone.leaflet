@@ -117,7 +117,7 @@ var MyMapView = Backbone.Leaflet.MapView.extend({
     ...
   },
 
-  onFeatureClick: function ( evt ) {
+  onLayerClick: function ( evt ) {
     var layer = evt.target;  // Get the Leaflet "layer" object.
     var model = this.collection.get( layer );  // Get the Backbone model associated to the "layer".
     ...
