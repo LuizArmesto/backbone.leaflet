@@ -24,6 +24,7 @@
       }
       .list > .list-item {
         padding: 5px;
+        cursor: pointer;
       }
       .list > .list-item:hover {
         background: #ddd;
@@ -43,6 +44,9 @@
         width: 900px;
         height: 150px;
       }
+      .deactive {
+        opacity: 0.5;
+      }
     </style>
   </head>
   <body>
@@ -59,13 +63,14 @@
     <script src="../src/backbone.leaflet.js"></script>
 
     <script type="text/template" id="list-item-template">
-      <span class="label"><%= properties.name %></span> <span class="destroy" title="Remove">x</span>
+      <span class="label <%if (!properties.active) { %>deactive<% }%>"><%= properties.name %></span> <span class="destroy" title="Remove">x</span>
     </script>
 
     <script type="text/template" id="output-template">
-      <textarea class="geoJSON"><%= geoJSON %></textarea>
-      <br />
       <button class="reset">Reset</button>
+      <button class="export">Export</button>
+      <br />
+      <textarea class="geoJSON"><%= geoJSON %></textarea>
     </script>
 
     <script>
@@ -82,7 +87,7 @@
           {
             "type": "Feature",
             "geometry": { "type": "Point", "coordinates": [-46.6156, -23.5016] },
-            "properties": { "name": "Point 2" }
+            "properties": { "name": "Point 2", "active": true }
           }
         ]
       };
@@ -111,8 +116,7 @@
         template: _.template( $( '#list-item-template' ).html() ),
         events: {
           'click .destroy': 'clear',
-          'mouseover .label': 'activate',
-          'mouseout .label': 'deactivate'
+          'click .label': 'toggle',
         },
         initialize: function () {
           this.listenTo( this.model, 'change', this.render );
@@ -125,15 +129,8 @@
         clear: function () {
           this.model.destroy();
         },
-        // Update the property used to decide the marker opacity.
-        // See MyMapView.layerStyle below.
-        // The Leaflet layer associated to a Backbone model is updated
-        // automatically every time a model attribute is changed.
-        activate: function () {
-          this.model.set( 'active', true );
-        },
-        deactivate: function () {
-          this.model.set( 'active', false );
+        toggle: function () {
+          this.model.toggle();
         }
       });
 
@@ -143,9 +140,10 @@
         template: _.template( $( '#output-template' ).html() ),
         events: {
           'click .reset': 'onReset',
+          'click .export': 'render',
         },
         initialize: function () {
-          this.listenTo( this.collection, 'all', this.render );
+          this.listenTo( this.collection, 'reset', this.render );
         },
         render: function () {
           this.$el.html( this.template({
@@ -160,30 +158,47 @@
 
       // Extending the `Backbone.Leaflet.MapView` to bind map events.
       var MyMapView = Backbone.Leaflet.MapView.extend({
-        // Bind `map`events using `map` as selector.
+        // Bind `map` events using `map` as selector and `layers` events using
+        // `layer` as selector.
         events: {
           'click map': 'onClick',
-          'click layer': 'onLayerClick'
+          'click layer': 'onLayerClick',
+          'mouseover layer': 'onLayerMouseover',
+          'mouseout layer': 'onLayerMouseout'
         },
 
         // Creates new point when user click on map.
         onClick: function ( e ) {
           var lat = e.latlng.lat;
           var lng = e.latlng.lng;
+          var n = this._n || 1;
           var geoJSON = {
             "type": "Feature",
             "geometry": { "type": "Point", "coordinates": [lng, lat] },
-            "properties": { "name": "Unnamed Point" }
+            "properties": { "name": "Unnamed Point " + n, "active": true }
           };
-          var geoModel = new Backbone.Leaflet.GeoModel( geoJSON );
-          this.collection.add( geoModel );
+          this.collection.add( geoJSON );
+          this._n = ++n;
         },
 
-        // Open the popup window when user click the marker.
+        // Toggle the model state when user click the marker.
         onLayerClick: function ( e ) {
           var layer = e.target;
           var model = this.collection.get( layer );
+          model.toggle();
+        },
+
+        // Open the popup window on mouseover.
+        onLayerMouseover: function ( e ) {
+          var layer = e.target;
+          var model = this.collection.get( layer );
           layer.bindPopup( model.get( 'name' ) ).openPopup();
+        },
+
+        // Close the popup window on mouseout.
+        onLayerMouseout: function ( e ) {
+          var layer = e.target;
+          layer.closePopup();
         },
 
         // Override the method used the set the layer style.
@@ -195,8 +210,17 @@
         }
       });
 
+      // Extending the `Backbone.Leaflet.GeoModel` to add custom methods.
+      var MyGeoModel = Backbone.Leaflet.GeoModel.extend({
+        toggle: function () {
+          this.set( 'active', !this.get( 'active' ) );
+        }
+      });
+
       // Creates a `GeoCollection` instance.
-      var geoCollection = new Backbone.Leaflet.GeoCollection();
+      var geoCollection = new Backbone.Leaflet.GeoCollection([], {
+        model: MyGeoModel
+      });
 
       // Creates an extended `mapView` instance.
       var mapView = new MyMapView({
