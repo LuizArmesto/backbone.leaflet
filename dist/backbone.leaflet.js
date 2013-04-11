@@ -131,7 +131,7 @@
   // Default pointToLayer function to GeoJSON layer.
   var layerPointToLayer = function ( feature, latLng ) {
     var model = this._getModelByFeature( feature );
-    return new L.Marker( latLng, this.modelStyle( model ) );
+    return new L.Marker( latLng, this.layerStyle( model ) );
   };
 
   // Default filter function to GeoJSON layer.
@@ -143,7 +143,7 @@
   // Default style function to GeoJSON layer.
   var layerStyle = function ( feature ) {
     var model = this._getModelByFeature( feature );
-    return this.modelStyle( model );
+    return this.layerStyle( model );
   };
 
   // Associates Backbone model and GeoJSON layer.
@@ -355,7 +355,7 @@
 
     // Function that will be used to get style options for vector layers
     // created for GeoJSON features.
-    modelStyle: function ( model ) {
+    layerStyle: function ( model ) {
       if ( !model ) {
         return this.defaultStyle;
       }
@@ -420,7 +420,7 @@
         this._onRemove( model );  // Removes the old layer
         this._onAdd( model );     // Creates new updated layer
       } else {
-        newStyle = this.modelStyle( model );
+        newStyle = this.layerStyle( model );
         if ( layer.setStyle && _.isFunction( layer.setStyle ) ) {
           // We have a path layer
           layer.setStyle( newStyle );

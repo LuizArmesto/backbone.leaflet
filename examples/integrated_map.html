@@ -126,7 +126,7 @@
           this.model.destroy();
         },
         // Update the property used to decide the marker opacity.
-        // See MyMapView.modelStyle below.
+        // See MyMapView.layerStyle below.
         // The Leaflet layer associated to a Backbone model is updated
         // automatically every time a model attribute is changed.
         activate: function () {
@@ -187,7 +187,7 @@
         },
 
         // Override the method used the set the layer style.
-        modelStyle: function ( model ) {
+        layerStyle: function ( model ) {
           var opacity = model.get( 'active' ) ? 1 : 0.5;
           return {
             opacity: opacity

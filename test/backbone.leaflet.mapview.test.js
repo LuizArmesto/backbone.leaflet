@@ -278,11 +278,11 @@
 
     // Map elements style tests
     // ------------------------
-    describe( 'modelStyle', function () {
+    describe( 'layerStyle', function () {
 
-      it( 'should use `defaultStyle` as fallback to `modelStyle` function', function () {
+      it( 'should use `defaultStyle` as fallback to `layerStyle` function', function () {
         var modelFake = {};
-        expect( this.mapView.modelStyle( modelFake ) ).to.be.equal( this.mapView.defaultStyle );
+        expect( this.mapView.layerStyle( modelFake ) ).to.be.equal( this.mapView.defaultStyle );
       });
 
       it( 'should get style from  models `getStyle` function if exists', function () {
@@ -292,7 +292,7 @@
             return myStyle;
           }
         };
-        expect( this.mapView.modelStyle( modelFake ) ).to.be.equal( myStyle );
+        expect( this.mapView.layerStyle( modelFake ) ).to.be.equal( myStyle );
       });
 
     });
