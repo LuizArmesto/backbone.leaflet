@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Backbone.leaflet by LuizArmesto</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Backbone.leaflet</h1>
+        <h2>A map component for Backbone.js</h2>
+        <a href="https://github.com/LuizArmesto/backbone.leaflet" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>Backbone.Leaflet (0.0.1-dev)</h1>
+
+<p><a href="http://travis-ci.org/LuizArmesto/backbone.leaflet"><img src="https://secure.travis-ci.org/LuizArmesto/backbone.leaflet.png" alt="Continuous Integration status"></a></p>
+
+<p><em>(Disclaimer: This project is in an early development stage. It is not intended to be used in production yet!)</em></p>
+
+<p><strong>Backbone.Leaflet</strong> is a <a href="http://backbonejs.org/">Backbone</a> plugin designed to work with geospatial data using <a href="http://geojson.org">GeoJSON</a> specification. This provides an extended model (<code>Backbone.Leaflet.GeoModel</code>) and an extended collection (<code>Backbone.Leaflet.GeoCollection</code>) that accepts and exports GeoJSON data and a couple of views (<code>Backbone.Leaflet.MapView</code> and <code>Backbone.Leaflet.SatelliteView</code>) to display <code>GeoModel</code> instances in a map, using <a href="http://leafletjs.com">Leaflet</a>.</p>
+
+<p>You should be familiar with both Backbone and Leaflet to get the best use out of this plugin.</p>
+
+<p><strong>Dependencies</strong>:</p>
+
+<ul>
+<li>
+<a href="http://backbonejs.org/#downloads">Backbone 1.0.0</a> and it dependencies</li>
+<li><a href="http://leafletjs.com/download.html">Leaflet 0.5.1</a></li>
+</ul><h2>Backbone.Leaflet.GeoModel</h2>
+
+<p>The <code>GeoModel</code> is a <a href="http://backbonejs.org/#Model">Backbone Model</a> to work with <a href="http://geojson.org/">GeoJSON</a>.</p>
+
+<p>When using <code>GeoModel</code> the method <code>toJSON</code> will return a JSON object following the <a href="http://geojson.org/geojson-spec.html">GeoJSON format specification</a>. On the other hand you can use either a common JSON or a <a href="http://geojson.org/geojson-spec.html#feature-objects">GeoJSON object with the type "Feature"</a> as an input data. All other methods works as in ordinary Backbone's model.</p>
+
+<h3>Creating a <code>GeoModel</code> instance</h3>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">geojsonFeature</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"Feature"</span><span class="p">,</span>
+  <span class="s2">"properties"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"name"</span><span class="o">:</span> <span class="s2">"Coors Field"</span><span class="p">,</span>
+    <span class="s2">"amenity"</span><span class="o">:</span> <span class="s2">"Baseball Stadium"</span><span class="p">,</span>
+    <span class="s2">"popupContent"</span><span class="o">:</span> <span class="s2">"This is where the Rockies play!"</span>
+  <span class="p">},</span>
+  <span class="s2">"geometry"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"Point"</span><span class="p">,</span>
+    <span class="s2">"coordinates"</span><span class="o">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">104.99404</span><span class="p">,</span> <span class="mf">39.75621</span><span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">var</span> <span class="nx">geoModel</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Leaflet</span><span class="p">.</span><span class="nx">GeoModel</span><span class="p">(</span> <span class="nx">geojsonFeature</span> <span class="p">);</span>
+
+</pre></div>
+
+<h2>Backbone.Leaflet.GeoCollection</h2>
+
+<p>The <code>GeoCollection</code> is a <a href="http://backbonejs.org/#Collection">Backbone Collection</a> to work with GeoJSON and <code>GeoModel</code>. You can create a new collection using either an array of <code>GeoModels</code> or a <a href="http://geojson.org/geojson-spec.html#feature-collection-objects">GeoJSON object with the type "FeatureCollection"</a>. The <code>toJSON</code> method will return a GeoJSON object.</p>
+
+<h3>Creating a <code>GeoCollection</code> instance</h3>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">geojsonFeatureCollection</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"FeatureCollection"</span><span class="p">,</span>
+  <span class="s2">"features"</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"Feature"</span><span class="p">,</span>
+      <span class="s2">"geometry"</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"Point"</span><span class="p">,</span>
+        <span class="s2">"coordinates"</span><span class="o">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">46.6368</span><span class="p">,</span> <span class="o">-</span><span class="mf">23.5100</span><span class="p">]</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"Feature"</span><span class="p">,</span>
+      <span class="s2">"geometry"</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"Point"</span><span class="p">,</span>
+        <span class="s2">"coordinates"</span><span class="o">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">46.6156</span><span class="p">,</span> <span class="o">-</span><span class="mf">23.5016</span><span class="p">]</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">};</span>
+
+<span class="kd">var</span> <span class="nx">geoCollection</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Leaflet</span><span class="p">.</span><span class="nx">GeoCollection</span><span class="p">(</span> <span class="nx">geojsonFeatureCollection</span> <span class="p">);</span>
+
+</pre></div>
+
+<h2>Backbone.Leaflet.MapView</h2>
+
+<p>The <code>MapView</code> is a <a href="http://backbonejs.org/#View">Backbone View</a> to display <code>GeoCollection</code> and <code>GeoModel</code> on <a href="http://leafletjs.com/">Leaflet</a> map using <a href="http://developer.mapquest.com/web/products/open/map">MapQuest-OSM</a> tiles.</p>
+
+<h3>Creating a simple map</h3>
+
+<p>Use <code>MapView</code> just like any other <code>Backbone</code> view.</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">mapView</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Leaflet</span><span class="p">.</span><span class="nx">MapView</span><span class="p">({</span>
+
+  <span class="nx">el</span><span class="o">:</span> <span class="s1">'#map'</span><span class="p">,</span>
+
+  <span class="nx">collection</span><span class="o">:</span> <span class="nx">geoCollection</span><span class="p">,</span>  <span class="c1">// See above how to create a `GeoCollection` instance.</span>
+
+  <span class="nx">map</span><span class="o">:</span> <span class="p">{</span>
+    <span class="p">...</span>  <span class="c1">// Leaflet map options (optional).</span>
+  <span class="p">}</span>
+
+<span class="p">});</span>
+</pre></div>
+
+<p>For more informations about map options see the <a href="http://leafletjs.com/reference.html#map-constructor">Leaflet documentation</a>.</p>
+
+<h3>Delegating map events</h3>
+
+<p>To delegate map events just define the <code>events</code> property like you usually do but use <em>"map"</em> as selector to <code>Leaflet</code> map events. To delegate <a href="http://leafletjs.com/reference.html#ilayer">Layers</a> (markers, polygons, etc) events use <em>"layer"</em> as selector.</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">MyMapView</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Leaflet</span><span class="p">.</span><span class="nx">MapView</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+
+  <span class="nx">events</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s1">'click map'</span><span class="o">:</span> <span class="s1">'onClick'</span><span class="p">,</span>
+    <span class="s1">'move map'</span><span class="o">:</span> <span class="s1">'onMove'</span><span class="p">,</span>
+    <span class="s1">'click layer'</span><span class="p">,</span> <span class="s1">'onLayerClick'</span>
+  <span class="p">},</span>
+
+  <span class="nx">onClick</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">evt</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+  <span class="p">},</span>
+
+  <span class="nx">onMove</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">evt</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+  <span class="p">},</span>
+
+  <span class="nx">onLayerClick</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">evt</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">layer</span> <span class="o">=</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">target</span><span class="p">;</span>  <span class="c1">// Get the Leaflet "layer" object.</span>
+    <span class="kd">var</span> <span class="nx">model</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">collection</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span> <span class="nx">layer</span> <span class="p">);</span>  <span class="c1">// Get the Backbone model associated to the "layer".</span>
+    <span class="p">...</span>
+  <span class="p">}</span>
+
+<span class="p">});</span>
+
+
+<span class="kd">var</span> <span class="nx">myMapView</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MyMapView</span><span class="p">({</span>
+  <span class="p">...</span>  <span class="c1">// View options.</span>
+<span class="p">});</span>
+
+</pre></div>
+
+<p>For more informations about Leaflet events see the <a href="http://leafletjs.com/reference.html#map-events">map events reference</a>.</p>
+
+<h2>Backbone.Leaflet.SatelliteView</h2>
+
+<p>The <code>SatelliteView</code> works similar to <code>MapView</code>, except that uses <a href="http://developer.mapquest.com/web/products/open/map">MapQuest Open Aerial</a> tiles.</p>
+
+<h2>Contributing</h2>
+
+<p>Indent your code with 2 spaces, strip trailing whitespace and take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using grunt.</p>
+
+<p>Also, please don't edit files in the <em>"dist"</em> subdirectory as they are generated via grunt. You'll find source code in the <em>"src"</em> subdirectory!</p>
+
+<h2>License</h2>
+
+<p>Copyright (c) 2013 Luiz Armesto Licensed under the MIT license.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/LuizArmesto/backbone.leaflet/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/LuizArmesto/backbone.leaflet/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/LuizArmesto/backbone.leaflet"></a> is maintained by <a href="https://github.com/LuizArmesto">LuizArmesto</a>.</p>
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
