@@ -182,7 +182,7 @@
             expect( e ).to.have.property( 'type' );
             expect( e ).to.have.property( 'target' );
             expect( e.target ).to.be.equal( this.map );
-            if ( ++n === 2 ) {
+            if ( ++n === _( this.events ).keys().length ) {
               done();
             }
           }
@@ -190,8 +190,12 @@
         // Instanciate MyMapView
         var myMapView = new MyMapView();
         // Fire map events
-        myMapView.map.fire( 'click' );
-        myMapView.map.fire( 'move' );
+        var events = _( _( myMapView.events ).keys() ).map( function ( key ) {
+            return key.split( ' ' )[0];
+        });
+        _( events ).each( function ( evt ) {
+          myMapView.map.fire( evt );
+        });
         // Clear `MyMapView` instance.
         myMapView.remove();
       });
@@ -204,10 +208,22 @@
         var MyMapView = Backbone.Leaflet.MapView.extend({
           events: {
             'click layer': 'onEvent',
-            'mouseover layer': 'onEvent'
+            'dblclick layer': 'onEvent',
+            'mouseover layer': 'onEvent',
+            'mouseout layer': 'onEvent',
+            'contextmenu layer': 'onEvent',
+            'dragstart layer': 'onEvent',
+            'predrag layer': 'onEvent',
+            'drag layer': 'onEvent',
+            'dragend layer': 'onEvent',
+            'move layer': 'onEvent',
+            'add layer': 'onEvent',
+            'remove layer': 'onEvent',
+            'layeradd layer': 'onEvent',
+            'layerremove layer': 'onEvent'
           },
           onEvent: function ( e ) {
-            if ( ++n === 2 ) {
+            if ( ++n === _( this.events ).keys().length ) {
               done();
             }
           }
@@ -218,8 +234,14 @@
         });
         // Add new model then verify if the other ids remains the same.
         geoCollection.add( model );
+        var layer = _.values( myMapView._layer._layers )[0];
         // Fire map events
-        _.values( myMapView._layer._layers )[0].fire( 'click' ).fire( 'mouseover' );
+        var events = _( _( myMapView.events ).keys() ).map( function ( key ) {
+            return key.split( ' ' )[0];
+        });
+        _( events ).each( function ( evt ) {
+          layer.fire( evt );
+        });
         // Clear `MyMapView` instance.
         myMapView.remove();
       });

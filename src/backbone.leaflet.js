@@ -150,7 +150,22 @@
     // Add cid to layer object to associate it with the backbone model instance.
     layer.cid = feature.properties.cid;
     // Proxy layer events.
-    var layerEvents = ['click', 'mouseover'];
+    var layerEvents = [
+      'click',
+      'dblclick',
+      'mouseover',
+      'mouseout',
+      'contextmenu',
+      'dragstart',
+      'predrag',
+      'drag',
+      'dragend',
+      'move',
+      'add',
+      'remove',
+      'layeradd',
+      'layerremove'
+    ];
     var that = this;
     _.each( layerEvents, function ( eventName ) {
       layer.on(eventName, function ( e ) {

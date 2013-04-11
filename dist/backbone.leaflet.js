@@ -1,4 +1,4 @@
-/*! backbone.leaflet - v0.0.1-dev - 3/30/2013
+/*! backbone.leaflet - v0.0.1-dev - 4/11/2013
 * http://github.com/LuizArmesto/backbone.leaflet
 * Copyright (c) 2013 Luiz Armesto; Licensed MIT */
 
@@ -152,7 +152,22 @@
     // Add cid to layer object to associate it with the backbone model instance.
     layer.cid = feature.properties.cid;
     // Proxy layer events.
-    var layerEvents = ['click', 'mouseover'];
+    var layerEvents = [
+      'click',
+      'dblclick',
+      'mouseover',
+      'mouseout',
+      'contextmenu',
+      'dragstart',
+      'predrag',
+      'drag',
+      'dragend',
+      'move',
+      'add',
+      'remove',
+      'layeradd',
+      'layerremove'
+    ];
     var that = this;
     _.each( layerEvents, function ( eventName ) {
       layer.on(eventName, function ( e ) {
