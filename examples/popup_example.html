@@ -1,0 +1,134 @@
+<html>
+  <head>
+    <title>Backbone.Leaflet Popup Example</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="../lib/css/leaflet.css" />
+    <!--[if lte IE 8]>
+    <link rel="stylesheet" href="../lib/css/leaflet.ie.css" />
+    <![endif]-->
+    <style>
+      #geoJSON,
+      #map {
+        width: 700px;
+      }
+      #map {
+        height: 400px;
+      }
+      #geoJSON {
+        height: 150px;
+      }
+      #update {
+        padding: 10px;
+      }
+      .popup .title {
+        color: green;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Popup Example</h1>
+    <p>Edit the point properties.</p>
+    <div id="form"></div>
+    <div id="map"></div>
+    <div id="message"></div>
+    <script src="../lib/js/jquery.js"></script>
+    <script src="../lib/js/underscore.js"></script>
+    <script src="../lib/js/backbone.js"></script>
+    <script src="../lib/js/leaflet.js"></script>
+    <script src="../src/backbone.leaflet.js"></script>
+
+    <script type="text/template" id="popup-template">
+      <div class="popup">
+        <div class="title"><%= properties.name %></div>
+        <p><%= properties.description %></p>
+        <button class="button">Click me!</button>
+      </div>
+    </script>
+
+    <script type="text/template" id="form-template">
+      <form>
+        Name: <input type="text" class="name" value="<%= properties.name %>" />
+        Description: <input type="text" class="description" value="<%= properties.description %>" />
+      </form>
+    </script>
+
+    <script>
+
+      // Create a `GeoCollection` instance.
+      var geoCollection = new Backbone.Leaflet.GeoCollection({
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [-46.6155, -23.5023]
+            },
+            "properties": {
+              "name": "Point",
+              "description": "I'm a point with popup."
+            }
+          }
+        ]
+      });
+
+      var FormView = Backbone.View.extend({
+        template: _.template( $( '#form-template' ).html() ),
+        el: '#form',
+
+        events: {
+          'submit form': 'onSubmit',
+          'keyup input': 'onSubmit'
+        },
+
+        initialize: function () {
+          this.render();
+        },
+
+        render: function () {
+          this.$el.html( this.template( this.model.toJSON() ) )
+          return this;
+        },
+
+        onSubmit: function ( evt ) {
+          evt.preventDefault();
+          this.model.set({
+            name: this.$( '.name' ).val(),
+            description: this.$( '.description' ).val()
+          });
+        }
+      });
+
+      var MyPopupView = Backbone.Leaflet.PopupView.extend({
+        // Set a custom template.
+        template: _.template( $( '#popup-template' ).html() ),
+
+        // Bind some events.
+        events: {
+          'click .button': 'onButtonClick'
+        },
+
+        onButtonClick: function ( evt ) {
+          var name = this.model.get( 'name' );
+          alert( 'Hey! You clicked on "' + name + '" popup.' );
+        }
+      });
+
+      var formView = new FormView({
+        model: geoCollection.models[0]
+      });
+
+      // Create a `mapView` instance.
+      var mapView = new Backbone.Leaflet.MapView({
+        el: '#map',
+        collection: geoCollection,
+        popupView: MyPopupView,
+        style: { fillColor: 'green', color: 'green' }
+      });
+
+      mapView.openPopup( geoCollection.models[0] );
+
+    </script>
+  </body>
+</html>

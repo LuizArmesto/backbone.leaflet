@@ -60,6 +60,13 @@
         expect( this.mapView.map ).to.be.instanceOf( L.Map );
       });
 
+      it( 'should initialize a `popup` property', function () {
+        expect( this.mapView ).to.have.property( 'popup' );
+        expect( this.mapView.popup ).to.be.instanceOf( L.Popup );
+        expect( this.mapView ).to.have.property( 'popupView' );
+        expect( this.mapView.popup ).to.be.equal( this.mapView.popupView.popup );
+      });
+
       it( 'should append `Leaflet` DOM elements', function () {
         expect( this.mapView.$el.hasClass( 'leaflet-container' ) ).to.be.equal(true);
         expect( this.mapView.$el.html() ).to.have.string( 'leaflet-map-pane' );

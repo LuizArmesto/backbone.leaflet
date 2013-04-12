@@ -191,8 +191,7 @@
         // Open the popup window on mouseover.
         onLayerMouseover: function ( e ) {
           var layer = e.target;
-          var model = this.collection.get( layer );
-          layer.bindPopup( model.get( 'name' ) ).openPopup();
+          this.openPopup( layer );
         },
 
         // Close the popup window on mouseout.

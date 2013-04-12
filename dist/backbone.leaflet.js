@@ -122,6 +122,51 @@
 
   });
 
+
+  // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+
+  // Backbone.Leaflet.PopupView
+  // --------------------------
+
+  // Extend `Backbone.View`.
+  var PopupView = Leaflet.PopupView = function ( options ) {
+    // TODO: Write documentation about this
+    Backbone.View.apply( this, arguments );
+    // Create the Leaflet Popup instance used to display this view.
+    this.popup = new L.Popup( options );
+  };
+
+  // Set up inheritance.
+  PopupView.extend = Backbone.View.extend;
+
+  _.extend( PopupView.prototype, Backbone.View.prototype, {
+      template: _.template( '<strong><'+'%= properties.name %'+'></strong><p><%'+'= properties.description %'+'></p>' ),
+
+      // Render the model into popup.
+      render: function ( model ) {
+        this.setModel( model );
+        if ( this.popup._content !== this.el ) {
+          this.popup.setContent( this.el );
+        }
+        this.$el.html( this.template( this.model.toJSON() ) );
+        this.popup._update();
+        return this;
+      },
+
+      // Set new model to be rendered.
+      setModel: function ( model ) {
+        if ( model ) {
+          if ( this.model ) {
+            this.stopListening( this.model );
+          }
+          this.model = model;
+          this.listenTo( model, 'change', this.render );
+        }
+        return this;
+      }
+  });
+
   // -------------------------------------------------------------------------
   // -------------------------------------------------------------------------
 
@@ -191,6 +236,7 @@
   // `Backbone.Leaflet.GeoCollection` instances on map.
   var MapView = Leaflet.MapView = function ( options ) {
     Backbone.View.apply( this, arguments );
+    this._ensureMap();
     this._layers = {};
     // Create a GeoJSON layer associated with the collection
     this._layer = this._getLayer();
@@ -200,7 +246,6 @@
         throw new Error( 'The "collection" option should be instance of ' +
                          '"GeoCollection" to be used within Map view' );
       }
-      this._ensureMap();
       // Bind Collection events.
       this.listenTo( this.collection, 'reset', this._onReset );
       this.listenTo( this.collection, 'add', this._onAdd );
@@ -239,6 +284,11 @@
       zoom: 14
     },
 
+    // Default options used to create the Leaflet popup.
+    defaultPopupOptions: {
+
+    },
+
     redraw: function () {
       this._layers = {};
       this._layer.clearLayers();
@@ -252,7 +302,8 @@
     // See `Leaflet` documentation to get available events.
     // http://leafletjs.com/reference.html#map-events
     delegateEvents: function ( events ) {
-          this._ensureMap();
+      this._ensureMap();
+      this._ensurePopup();
       var context = 'delegateEvents' + this.cid;
       Backbone.View.prototype.delegateEvents.apply( this, arguments );
       // Do everything as `Backbone` do but bind to `Leaflet`.
@@ -320,6 +371,43 @@
       );
     },
 
+    // Open the popup for `obj`, using `content` if defined.
+    // If the optional `content` parameter was not passed, use the popupView.
+    // The `obj` parameter can be a model or a layer.
+    openPopup: function ( obj, content ) {
+      this._ensurePopup();
+      // Get the model and the layer from obj.
+      var model = this.collection.get( obj );
+      var layer = this._getLayerByModel( model );
+      layer.bindPopup( '' );
+      // Copy the layer popup options to popupView custom popup.
+      L.setOptions( this.popup, layer._popup.options );
+      // Replace the layer popup
+      layer._popup = this.popup;
+      // Use the optional content param.
+      if ( content ) {
+        this.popup.setContent( content );
+      } else {
+        this.popupView.render( model );
+      }
+      layer.openPopup();
+    },
+
+    // Ensure that the vie has a `Leaflet` popup.
+    _ensurePopup: function () {
+      if ( !this.popup ) {
+        // Set the popup options values. `options.popup` accepts all `L.Popup`
+        // options.
+        // http://leafletjs.com/reference.html#popup-options
+        this.popupOptions = _.defaults( this.options.popup || {},
+                                        this.defaultPopupOptions );
+        // Create the Leaflet popup instance.
+        var PopupViewClass = this.options.popupView || PopupView;
+        this.popupView = new PopupViewClass( this.popupOptions );
+        this.popup = this.popupView.popup;
+      }
+    },
+
     // Ensure that the view has a `Leaflet` map object.
     _ensureMap: function () {
       if ( !this.map ) {
@@ -377,6 +465,11 @@
       var models = _.where( this.collection.models,
                             {cid: feature.properties.cid} );
       return models[0];
+    },
+
+    // Returns the Leaflet Layer associated tp the Backbone Model received.
+    _getLayerByModel: function ( model ) {
+        return this._layers[model.cid];
     },
 
     // Ensure that the collection has a `GeoJSON` layer.
