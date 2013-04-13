@@ -74,7 +74,7 @@ var geoCollection = new Backbone.Leaflet.GeoCollection( geojsonFeatureCollection
 
 The `MapView` is a [Backbone View](http://backbonejs.org/#View) to display `GeoCollection` on [Leaflet](http://leafletjs.com/) map using [MapQuest-OSM](http://developer.mapquest.com/web/products/open/map) tiles.
 
-There are some functions that can be override to customize the map behavior and appearance.
+There are some functions that can be overridden to customize the map behavior and appearance.
 
  * __getTileLayer()__ - Function that will be used to get an instance of `L.TileLayer`. Can be overridden to use another tiles server.
  * __modelFilter( model )__ - Function that receives a model and returns `true` if the model should be added to map, otherwise `false`. Can be overridden but is recommended to use the `filter` option.
