@@ -74,24 +74,24 @@ var geoCollection = new Backbone.Leaflet.GeoCollection( geojsonFeatureCollection
 
 The `MapView` is a [Backbone View](http://backbonejs.org/#View) to display `GeoCollection` on [Leaflet](http://leafletjs.com/) map using [MapQuest-OSM](http://developer.mapquest.com/web/products/open/map) tiles.
 
-There are some functions that can be override to customize the map behavior and apparence.
+There are some functions that can be override to customize the map behavior and appearance.
 
- * getTileLayer() - Function that will be used to get an instance of `L.TileLayer`. Can be overridden to use another tiles server.
- * modelFilter( model ) - Function that receives a model and returns `true` if the model should be added to map, otherwise `false`. Can be overridden but is recommended to use the `filter` option.
- * layerStyle( model ) - Function that receives a model and returns the [Leaflet style options](http://leafletjs.com/reference.html#path-options) used to define the layer apparence. Can be overridden but is recommended to use the `style` option.
+ * __getTileLayer()__ - Function that will be used to get an instance of `L.TileLayer`. Can be overridden to use another tiles server.
+ * __modelFilter( model )__ - Function that receives a model and returns `true` if the model should be added to map, otherwise `false`. Can be overridden but is recommended to use the `filter` option.
+ * __layerStyle( model )__ - Function that receives a model and returns the [Leaflet style options](http://leafletjs.com/reference.html#path-options) used to define the layer appearance. Can be overridden but is recommended to use the `style` option.
 
 ### Constructor Options
 
 The `mapView` constructor allows some options.
 
- * collection - `GeoCollection` instance.
- * el - DOM element used to render the map.
- * map - [Leaflet Map options](http://leafletjs.com/reference.html#map-options) (optional).
- * popup - [Leaflet Popup options](http://leafletjs.com/reference.html#popup-options) (optional).
- * popupView - Constructor of Backbone view used to render the popup content (optional).
- * layer - [Leaflet GeoJSON Layer options](http://leafletjs.com/reference.html#geojson-options) (optional). It is not recommended to set custom callbacks using this option because this will override some important functions used internally.
- * style - [Leaflet style options](http://leafletjs.com/reference.html#path-options) or a function that receives a model and should return a style options object (optional). Prefer using this option instead of override `layerStyle` function or `layer.style` option.
- * filter - Function that will receive a model and should return `true`if the model should be added to map or `false` if not (optional). Prefer using this option instead of override `modelFilter` function or `layer.filter` option.
+ * __collection__ - `GeoCollection` instance.
+ * __el__ - DOM element used to render the map.
+ * __map__ - [Leaflet Map options](http://leafletjs.com/reference.html#map-options) (optional).
+ * __popup__ - [Leaflet Popup options](http://leafletjs.com/reference.html#popup-options) (optional).
+ * __popupView_ - Constructor of Backbone view used to render the popup content (optional).
+ * __layer__ - [Leaflet GeoJSON Layer options](http://leafletjs.com/reference.html#geojson-options) (optional). It is not recommended to set custom callbacks using this option because this will override some important functions used internally.
+ * __style__ - [Leaflet style options](http://leafletjs.com/reference.html#path-options) or a function that receives a model and should return a style options object (optional). Prefer using this option instead of override `layerStyle` function or `layer.style` option.
+ * __filter__ - Function that will receive a model and should return `true`if the model should be added to map or `false` if not (optional). Prefer using this option instead of override `modelFilter` function or `layer.filter` option.
 
 ### Creating a Simple Map
 
@@ -159,7 +159,7 @@ The `SatelliteView` works similar to `MapView`, except that uses [MapQuest Open 
 
 ## Backbone.Leaflet.PopupView
 
-Backbone View used to render the popup content. You can extend this view to create a more complex popup and use the `MapView` `popupView` option to set you custom view.
+Backbone View used to render the popup content. You can extend this view to create a more complex popup and use the `MapView` `popupView` option to use your custom view.
 
 ## Contributing
 Indent your code with 2 spaces, strip trailing whitespace and take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using grunt.
