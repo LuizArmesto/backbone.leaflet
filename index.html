@@ -37,7 +37,7 @@
 
 <p><em>(Disclaimer: This project is in an early development stage. It is not intended to be used in production yet!)</em></p>
 
-<p><strong>Backbone.Leaflet</strong> is a <a href="http://backbonejs.org/">Backbone</a> plugin designed to work with geospatial data using <a href="http://geojson.org">GeoJSON</a> specification. This provides an extended model (<code>Backbone.Leaflet.GeoModel</code>) and an extended collection (<code>Backbone.Leaflet.GeoCollection</code>) that accepts and exports GeoJSON data and a couple of views (<code>Backbone.Leaflet.MapView</code> and <code>Backbone.Leaflet.SatelliteView</code>) to display <code>GeoModel</code> instances in a map, using <a href="http://leafletjs.com">Leaflet</a>.</p>
+<p><strong>Backbone.Leaflet</strong> is a <a href="http://backbonejs.org/">Backbone</a> plugin designed to work with geospatial data using <a href="http://geojson.org">GeoJSON</a> specification, providing an extended model (<code>Backbone.Leaflet.GeoModel</code>) and an extended collection (<code>Backbone.Leaflet.GeoCollection</code>) that accepts and exports GeoJSON data and a couple of views (<code>Backbone.Leaflet.MapView</code> and <code>Backbone.Leaflet.SatelliteView</code>) to display <code>GeoModel</code> instances in a map, using <a href="http://leafletjs.com">Leaflet</a>.</p>
 
 <p>You should be familiar with both Backbone and Leaflet to get the best use out of this plugin.</p>
 
@@ -53,7 +53,7 @@
 
 <p>When using <code>GeoModel</code> the method <code>toJSON</code> will return a JSON object following the <a href="http://geojson.org/geojson-spec.html">GeoJSON format specification</a>. On the other hand you can use either a common JSON or a <a href="http://geojson.org/geojson-spec.html#feature-objects">GeoJSON object with the type "Feature"</a> as an input data. All other methods works as in ordinary Backbone's model.</p>
 
-<h3>Creating a <code>GeoModel</code> instance</h3>
+<h3>Creating a <code>GeoModel</code> Instance</h3>
 
 <div class="highlight"><pre><span class="kd">var</span> <span class="nx">geojsonFeature</span> <span class="o">=</span> <span class="p">{</span>
   <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"Feature"</span><span class="p">,</span>
@@ -76,7 +76,7 @@
 
 <p>The <code>GeoCollection</code> is a <a href="http://backbonejs.org/#Collection">Backbone Collection</a> to work with GeoJSON and <code>GeoModel</code>. You can create a new collection using either an array of <code>GeoModels</code> or a <a href="http://geojson.org/geojson-spec.html#feature-collection-objects">GeoJSON object with the type "FeatureCollection"</a>. The <code>toJSON</code> method will return a GeoJSON object.</p>
 
-<h3>Creating a <code>GeoCollection</code> instance</h3>
+<h3>Creating a <code>GeoCollection</code> Instance Using "FeatureCollection" GeoJSON</h3>
 
 <div class="highlight"><pre><span class="kd">var</span> <span class="nx">geojsonFeatureCollection</span> <span class="o">=</span> <span class="p">{</span>
   <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"FeatureCollection"</span><span class="p">,</span>
@@ -104,9 +104,39 @@
 
 <h2>Backbone.Leaflet.MapView</h2>
 
-<p>The <code>MapView</code> is a <a href="http://backbonejs.org/#View">Backbone View</a> to display <code>GeoCollection</code> and <code>GeoModel</code> on <a href="http://leafletjs.com/">Leaflet</a> map using <a href="http://developer.mapquest.com/web/products/open/map">MapQuest-OSM</a> tiles.</p>
+<p>The <code>MapView</code> is a <a href="http://backbonejs.org/#View">Backbone View</a> to display <code>GeoCollection</code> on <a href="http://leafletjs.com/">Leaflet</a> map using <a href="http://developer.mapquest.com/web/products/open/map">MapQuest-OSM</a> tiles.</p>
 
-<h3>Creating a simple map</h3>
+<p>There are some functions that can be override to customize the map behavior and appearance.</p>
+
+<ul>
+<li>
+<strong>getTileLayer()</strong> - Function that will be used to get an instance of <code>L.TileLayer</code>. Can be overridden to use another tiles server.</li>
+<li>
+<strong>modelFilter( model )</strong> - Function that receives a model and returns <code>true</code> if the model should be added to map, otherwise <code>false</code>. Can be overridden but is recommended to use the <code>filter</code> option.</li>
+<li>
+<strong>layerStyle( model )</strong> - Function that receives a model and returns the <a href="http://leafletjs.com/reference.html#path-options">Leaflet style options</a> used to define the layer appearance. Can be overridden but is recommended to use the <code>style</code> option.</li>
+</ul><h3>Constructor Options</h3>
+
+<p>The <code>mapView</code> constructor allows some options.</p>
+
+<ul>
+<li>
+<strong>collection</strong> - <code>GeoCollection</code> instance.</li>
+<li>
+<strong>el</strong> - DOM element used to render the map.</li>
+<li>
+<strong>map</strong> - <a href="http://leafletjs.com/reference.html#map-options">Leaflet Map options</a> (optional).</li>
+<li>
+<strong>popup</strong> - <a href="http://leafletjs.com/reference.html#popup-options">Leaflet Popup options</a> (optional).</li>
+<li>
+<strong>popupView</strong> - Constructor of Backbone view used to render the popup content (optional).</li>
+<li>
+<strong>layer</strong> - <a href="http://leafletjs.com/reference.html#geojson-options">Leaflet GeoJSON Layer options</a> (optional). It is not recommended to set custom callbacks using this option because this will override some important functions used internally.</li>
+<li>
+<strong>style</strong> - <a href="http://leafletjs.com/reference.html#path-options">Leaflet style options</a> or a function that receives a model and should return a style options object (optional). Prefer using this option instead of override <code>layerStyle</code> function or <code>layer.style</code> option.</li>
+<li>
+<strong>filter</strong> - Function that will receive a model and should return <code>true</code>if the model should be added to map or <code>false</code> if not (optional). Prefer using this option instead of override <code>modelFilter</code> function or <code>layer.filter</code> option.</li>
+</ul><h3>Creating a Simple Map</h3>
 
 <p>Use <code>MapView</code> just like any other <code>Backbone</code> view.</p>
 
@@ -125,9 +155,9 @@
 
 <p>For more informations about map options see the <a href="http://leafletjs.com/reference.html#map-constructor">Leaflet documentation</a>.</p>
 
-<h3>Delegating map events</h3>
+<h3>Delegating Map Events</h3>
 
-<p>To delegate map events just define the <code>events</code> property like you usually do but use <em>"map"</em> as selector to <code>Leaflet</code> map events. To delegate <a href="http://leafletjs.com/reference.html#ilayer">Layers</a> (markers, polygons, etc) events use <em>"layer"</em> as selector.</p>
+<p>To delegate map events just define the <code>events</code> property like you usually do but use <em>"map"</em> as selector to Leaflet map events. To delegate <a href="http://leafletjs.com/reference.html#ilayer">Layers</a> (markers, polygons, etc) events use <em>"layer"</em> as selector.</p>
 
 <div class="highlight"><pre><span class="kd">var</span> <span class="nx">MyMapView</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Leaflet</span><span class="p">.</span><span class="nx">MapView</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
 
@@ -165,6 +195,10 @@
 <h2>Backbone.Leaflet.SatelliteView</h2>
 
 <p>The <code>SatelliteView</code> works similar to <code>MapView</code>, except that uses <a href="http://developer.mapquest.com/web/products/open/map">MapQuest Open Aerial</a> tiles.</p>
+
+<h2>Backbone.Leaflet.PopupView</h2>
+
+<p>Backbone View used to render the popup content. You can extend this view to create a more complex popup and use the <code>MapView</code> <code>popupView</code> option to use your custom view.</p>
 
 <h2>Contributing</h2>
 
