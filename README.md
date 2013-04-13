@@ -88,7 +88,7 @@ The `mapView` constructor allows some options.
  * __el__ - DOM element used to render the map.
  * __map__ - [Leaflet Map options](http://leafletjs.com/reference.html#map-options) (optional).
  * __popup__ - [Leaflet Popup options](http://leafletjs.com/reference.html#popup-options) (optional).
- * __popupView_ - Constructor of Backbone view used to render the popup content (optional).
+ * __popupView__ - Constructor of Backbone view used to render the popup content (optional).
  * __layer__ - [Leaflet GeoJSON Layer options](http://leafletjs.com/reference.html#geojson-options) (optional). It is not recommended to set custom callbacks using this option because this will override some important functions used internally.
  * __style__ - [Leaflet style options](http://leafletjs.com/reference.html#path-options) or a function that receives a model and should return a style options object (optional). Prefer using this option instead of override `layerStyle` function or `layer.style` option.
  * __filter__ - Function that will receive a model and should return `true`if the model should be added to map or `false` if not (optional). Prefer using this option instead of override `modelFilter` function or `layer.filter` option.
