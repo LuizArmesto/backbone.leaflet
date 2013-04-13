@@ -1,4 +1,4 @@
-/*! backbone.leaflet - v0.0.1-dev - 4/11/2013
+/*! backbone.leaflet - v0.0.1-dev - 4/12/2013
 * http://github.com/LuizArmesto/backbone.leaflet
 * Copyright (c) 2013 Luiz Armesto; Licensed MIT */
 
@@ -144,8 +144,7 @@
       template: _.template( '<strong><'+'%= properties.name %'+'></strong><p><%'+'= properties.description %'+'></p>' ),
 
       // Render the model into popup.
-      render: function ( model ) {
-        this.setModel( model );
+      render: function () {
         if ( this.popup._content !== this.el ) {
           this.popup.setContent( this.el );
         }
@@ -388,7 +387,8 @@
       if ( content ) {
         this.popup.setContent( content );
       } else {
-        this.popupView.render( model );
+        this.popupView.setModel( model );
+        this.popupView.render();
       }
       layer.openPopup();
     },
@@ -443,6 +443,7 @@
 
     // Function that will be used to get style options for vector layers
     // created for GeoJSON features.
+    // Override this to change the layers style.
     layerStyle: function ( model ) {
       if ( !model ) {
         return this.defaultStyle;
