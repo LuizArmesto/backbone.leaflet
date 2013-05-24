@@ -9,7 +9,7 @@ __Backbone.Leaflet__ is a [Backbone](http://backbonejs.org/) plugin designed to 
 You should be familiar with both Backbone and Leaflet to get the best use out of this plugin.
 
 __Dependencies__:
- * [Backbone 1.0.0](http://backbonejs.org/#downloads) and it dependencies
+ * [Backbone 1.0.0](http://backbonejs.org/#downloads) and its dependencies
  * [Leaflet 0.5.1](http://leafletjs.com/download.html)
 
 

@@ -220,6 +220,64 @@
   };
 
 
+  // Converts the `Leaflet` layer type to GeoJSON geometry type.
+  var layerTypeToGeometryType = function ( layerType ) {
+    // FIXME: Write some tests.
+    switch ( layerType ) {
+      case 'marker':
+        return 'Point';
+      case 'polygon':
+      case 'rectangle':
+        return 'Polygon';
+      case 'polyline':
+        return 'LineString';
+      default:
+        throw new Error( "GeoJSON don't allows " + layerType + " as geometry." );
+    }
+  };
+
+
+  // Get the GeoJSON geometry coordinates from `Leaflet` layer.
+  var layerToCoords = function ( layer, type ) {
+    // FIXME: Write some tests.
+    var latLngs;
+    var coords = [];
+
+    // Use duck typing to get the `LatLng` objects from layer.
+    if ( _.isFunction( layer.getLatLngs ) ) {
+      latLngs = layer.getLatLngs();
+    } else if ( _.isFunction( layer.getLatLng ) ) {
+      latLngs = [ layer.getLatLng() ];
+    }
+
+    // Convert the `LatLng` objects to GeoJSON compatible array.
+    _.each( latLngs, function ( latLng ) {
+      coords.push( [ latLng.lng, latLng.lat ] );
+    });
+
+    if ( type === 'polygon' || type === 'rectangle' ) {
+      coords = [ coords ];
+    } else if ( type === 'marker' ) {
+      coords = coords[0];
+    }
+
+    return coords;
+  };
+
+
+  // Creates a GeoJSON from `Leaflet` layer.
+  var layerToGeoJSON = function ( layer, type ) {
+    // FIXME: Write some tests.
+    return {
+      "type": "Feature",
+      "geometry": {
+        "type": layerTypeToGeometryType( type ),
+        "coordinates": layerToCoords( layer, type )
+      },
+      "properties": {}
+    };
+  };
+
   // Cached regex to split keys for `delegate`.
   var delegateEventSplitter = /^(\S+)\s*(.*)$/;
 
@@ -234,6 +292,7 @@
   var MapView = Leaflet.MapView = function ( options ) {
     Backbone.View.apply( this, arguments );
     this._ensureMap();
+    this._initDrawControl();
     this._layers = {};
     // Create a GeoJSON layer associated with the collection
     this._layer = this._getLayer();
@@ -278,7 +337,9 @@
     // Default options used to create the Leaflet map.
     defaultMapOptions: {
       center: [ -23.5, -46.6167 ],
-      zoom: 14
+      zoom: 14,
+      // Add draw control if `Leaflet.draw` plugin was loaded.
+      drawControl: (L.Draw != null)
     },
 
     // Default options used to create the Leaflet popup.
@@ -408,18 +469,54 @@
 
     // Ensure that the view has a `Leaflet` map object.
     _ensureMap: function () {
-      if ( !this.map ) {
-        // Set the map options values. `options.map` accepts all `L.Map`
-        // options.
-        // http://leafletjs.com/reference.html#map-constructor
-        this.mapOptions = _.defaults( this.options.map || {},
-                                      this.defaultMapOptions );
-        // Create the Leaflet map instance.
-        this.map = new L.Map( this.el, this.mapOptions );
-        // Get the tile layer and add it to map
-        this.tileLayer = this.getTileLayer();
-        this.tileLayer.addTo(this.map);
+      if ( this.map ) {
+          // We already have initialized the `Leaflet` map.
+          return;
       }
+
+      // Set the map options values. `options.map` accepts all `L.Map`
+      // options.
+      // http://leafletjs.com/reference.html#map-constructor
+      this.mapOptions = _.defaults( this.options.map || {},
+                                    this.defaultMapOptions );
+      // Create the Leaflet map instance.
+      this.map = new L.Map( this.el, this.mapOptions );
+      // Get the tile layer and add it to map
+      this.tileLayer = this.getTileLayer();
+      this.tileLayer.addTo( this.map );
+    },
+
+    // Initialize the draw control if the `Leaflet.draw` plugin was loaded.
+    _initDrawControl: function () {
+      // FIXME: Write some tests.
+      var that = this;
+
+      if ( L.Draw === null || !this.mapOptions.drawControl ) {
+        // User don't want the editor or don't have the plugin loaded.
+        return;
+      }
+
+      // Get the layers created by the user using `Leaflet.draw`.
+      this.map.on( 'draw:created', function ( e ) {
+        var geoJSON;
+        var model;
+        // Add layer to GeoJSON layer group.
+        that._layer.addLayer( e.layer );
+        // Convert layer to GeoJSON.
+        geoJSON = layerToGeoJSON( e.layer, e.layerType );
+        // Create the model instance.
+        model = new that.collection.model( geoJSON );
+        // Associate the layer with the model.
+        e.layer.cid = model.cid;
+        geoJSON.properties.cid = model.cid;
+        // Handle layer events.
+        layerOnEachFeature.apply( that, [ geoJSON, e.layer ] );
+        that._updateLayerStyle( e.layer, model );
+        // Add model to collection. This should be the last thing done.
+        that.collection.add( model );
+      });
+
+
     },
 
     // Function that will be used to decide whether to show a feature or not.
@@ -490,6 +587,11 @@
 
     // Add to map the model added to collection
     _onAdd: function ( model ) {
+      // Don't duplicate a layer already drawn.
+      // This avoids duplication of layers drawn with `Leaflet.draw` plugin.
+      if ( this._getLayerByModel( model ) ) {
+        return;
+      }
       this._layer.addData( model.toJSON({ cid: true }) );
     },
 
@@ -502,7 +604,7 @@
       }
     },
 
-    // Update the map layer
+    // Updates the map layer
     _onChange: function ( model ) {
       // FIXME: Write some tests.
       var newStyle;
@@ -512,19 +614,25 @@
         this._onRemove( model );  // Removes the old layer
         this._onAdd( model );     // Creates new updated layer
       } else {
-        newStyle = this.layerStyle( model );
-        if ( layer.setStyle && _.isFunction( layer.setStyle ) ) {
-          // We have a path layer
-          layer.setStyle( newStyle );
-        } else if ( ( layer.setIcon && _.isFunction( layer.setIcon ) ) &&
-                    ( layer.setOpacity && _.isFunction( layer.setOpacity ) ) ) {
-          // We have a marker
-          if ( newStyle.icon ) {
-            layer.setIcon( newStyle.icon );
-          }
-          if ( newStyle.opacity ) {
-            layer.setOpacity( newStyle.opacity );
-          }
+        this._updateLayerStyle( layer, model );
+      }
+    },
+
+    // Updates the layer style using model data
+    _updateLayerStyle: function ( layer, model ) {
+      // FIXME: Write some tests.
+      var newStyle = this.layerStyle( model );
+      if ( layer.setStyle && _.isFunction( layer.setStyle ) ) {
+        // We have a path layer
+        layer.setStyle( newStyle );
+      } else if ( ( layer.setIcon && _.isFunction( layer.setIcon ) ) &&
+                  ( layer.setOpacity && _.isFunction( layer.setOpacity ) ) ) {
+        // We have a marker
+        if ( newStyle.icon ) {
+          layer.setIcon( newStyle.icon );
+        }
+        if ( newStyle.opacity ) {
+          layer.setOpacity( newStyle.opacity );
         }
       }
     }

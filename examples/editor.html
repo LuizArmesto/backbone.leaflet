@@ -1,0 +1,233 @@
+<html>
+  <head>
+    <title>Backbone.Leaflet Editor Example</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="../lib/css/leaflet.css" />
+    <link rel="stylesheet" href="../lib/css/leaflet.draw.css" />
+    <!--[if lte IE 8]>
+    <link rel="stylesheet" href="../lib/css/leaflet.ie.css" />
+    <link rel="stylesheet" href="../lib/css/leaflet.draw.ie.css" />
+    <![endif]-->
+    <style>
+      .map {
+        width: 700px;
+      }
+      .map, .list {
+        float: left;
+        height: 400px;
+      }
+      .list {
+        width: 200px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        overflow: auto;
+        background: #eee;
+      }
+      .list > .list-item {
+        padding: 5px;
+        cursor: pointer;
+      }
+      .list > .list-item:hover {
+        background: #ddd;
+      }
+      .list > .list-item > .label {
+        display: inline-block;
+        width: 160px;
+      }
+      .list > .list-item > .destroy {
+        cursor: pointer;
+      }
+      .output {
+        display: block;
+        clear: both;
+      }
+      .output > textarea {
+        width: 900px;
+        height: 150px;
+      }
+      .deactive {
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Editor Example</h1>
+    <p>Leaflet.draw plugin integration</p>
+    <div id="map" class="map"></div>
+    <ul id="list" class="list"></ul>
+    <div id="output" class="output"></div>
+
+    <script src="../lib/js/jquery.js"></script>
+    <script src="../lib/js/underscore.js"></script>
+    <script src="../lib/js/backbone.js"></script>
+    <script src="../lib/js/leaflet.js"></script>
+    <script src="../lib/js/leaflet.draw.js"></script>
+    <script src="../src/backbone.leaflet.js"></script>
+
+    <script type="text/template" id="list-item-template">
+      <span class="label <%if (!properties.active) { %>deactive<% }%>"><%= properties.name %></span> <span class="destroy" title="Remove">x</span>
+    </script>
+
+    <script type="text/template" id="output-template">
+      <button class="reset">Reset</button>
+      <button class="export">Export</button>
+      <br />
+      <textarea class="geoJSON"><%= geoJSON %></textarea>
+    </script>
+
+    <script>
+
+      // Initial geoJSON to render.
+      var geoJSON = {
+        "type": "FeatureCollection",
+        "features": [
+        ]
+      };
+
+      // Backbone view to create the list of "features".
+      var ListView = Backbone.View.extend({
+        className: 'list',
+        initialize: function () {
+          this.listenTo( this.collection, 'add', this.addOne );
+          this.listenTo( this.collection, 'reset', this.addAll );
+        },
+        addOne: function ( model ) {
+          var view = new ListItemView({ model: model });
+          this.$el.append( view.render().el );
+        },
+        addAll: function () {
+          this.$el.html( '' );
+          this.collection.each( this.addOne, this );
+        }
+      });
+
+      // Backbone view to display an item in the "features" list.
+      var ListItemView = Backbone.View.extend({
+        tagName: 'li',
+        className: 'list-item',
+        template: _.template( $( '#list-item-template' ).html() ),
+        events: {
+          'click .destroy': 'clear',
+          'click .label': 'toggle',
+        },
+        initialize: function () {
+          this.listenTo( this.model, 'change', this.render );
+          this.listenTo( this.model, 'destroy', this.remove );
+        },
+        render: function () {
+          this.$el.html( this.template( this.model.toJSON() ) );
+          return this;
+        },
+        clear: function () {
+          this.model.destroy();
+        },
+        toggle: function () {
+          this.model.toggle();
+        }
+      });
+
+      // Output view to display the current geoJSON and to allow the user to
+      // edit it and then reset the map content.
+      var OutputView = Backbone.View.extend({
+        template: _.template( $( '#output-template' ).html() ),
+        events: {
+          'click .reset': 'onReset',
+          'click .export': 'render',
+        },
+        initialize: function () {
+          this.listenTo( this.collection, 'reset', this.render );
+        },
+        render: function () {
+          this.$el.html( this.template({
+            geoJSON: JSON.stringify( this.collection.toJSON(), null, '  ' )
+          }) );
+          return this;
+        },
+        onReset: function () {
+          this.collection.reset( JSON.parse( this.$( '.geoJSON' ).val() ) );
+        }
+      });
+
+      // Extending the `Backbone.Leaflet.MapView` to bind map events.
+      var MyMapView = Backbone.Leaflet.MapView.extend({
+        // Bind `map` events using `map` as selector and `layers` events using
+        // `layer` as selector.
+        events: {
+          'draw:created map': 'onDraw',
+          'click layer': 'onLayerClick',
+          'mouseover layer': 'onLayerMouseover',
+          'mouseout layer': 'onLayerMouseout'
+        },
+
+        // Get the layer drawn.
+        onDraw: function ( e ) {
+          var layer = e.layer;
+          var model = this.collection.get( layer );
+          model.set({ name: model.get( 'geometry' ).type + ' ' + model.cid });
+        },
+
+        // Toggle the model state when user click the marker.
+        onLayerClick: function ( e ) {
+          var layer = e.target;
+          var model = this.collection.get( layer );
+          model.toggle();
+        },
+
+        // Open the popup window on mouseover.
+        onLayerMouseover: function ( e ) {
+          var layer = e.target;
+          this.openPopup( layer );
+        },
+
+        // Close the popup window on mouseout.
+        onLayerMouseout: function ( e ) {
+          var layer = e.target;
+          layer.closePopup();
+        },
+
+        // Override the method used the set the layer style.
+        layerStyle: function ( model ) {
+          var opacity = model.get( 'active' ) ? 1 : 0.5;
+          return {
+            opacity: opacity
+          }
+        }
+      });
+
+      // Extending the `Backbone.Leaflet.GeoModel` to add custom methods.
+      var MyGeoModel = Backbone.Leaflet.GeoModel.extend({
+        toggle: function () {
+          this.set( 'active', !this.get( 'active' ) );
+        }
+      });
+
+      // Creates a `GeoCollection` instance.
+      var geoCollection = new Backbone.Leaflet.GeoCollection([], {
+        model: MyGeoModel
+      });
+
+      // Creates an extended `mapView` instance.
+      var mapView = new MyMapView({
+        el: '#map',
+        collection: geoCollection
+      });
+
+      // Creates a list view instance.
+      var listView = new ListView({
+        el: '#list',
+        collection: geoCollection
+      });
+
+      // Creates an output view instance to show the geoJSON generated.
+      var outputView = new OutputView({
+        el: '#output',
+        collection: geoCollection
+      });
+
+      // Loads models from geoJSON.
+      geoCollection.reset( geoJSON );
+
+    </script>
+  </body>
+</html>
