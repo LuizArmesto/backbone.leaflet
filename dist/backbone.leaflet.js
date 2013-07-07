@@ -1,4 +1,4 @@
-/*! backbone.leaflet - v0.0.1-dev - 5/23/2013
+/*! backbone.leaflet - v0.0.1-dev - 7/7/2013
 * http://github.com/LuizArmesto/backbone.leaflet
 * Copyright (c) 2013 Luiz Armesto; Licensed MIT */
 
@@ -347,6 +347,11 @@
     // Default options used to create the Leaflet popup.
     defaultPopupOptions: {
 
+    },
+
+    render: function () {
+      this.__ensureMap();
+      this.map.invalidateSize();
     },
 
     redraw: function () {

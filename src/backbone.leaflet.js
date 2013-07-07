@@ -347,6 +347,11 @@
 
     },
 
+    render: function () {
+      this.__ensureMap();
+      this.map.invalidateSize();
+    },
+
     redraw: function () {
       this._layers = {};
       this._layer.clearLayers();
