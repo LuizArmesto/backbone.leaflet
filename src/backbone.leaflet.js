@@ -348,7 +348,6 @@
     },
 
     render: function () {
-      this.__ensureMap();
       this.map.invalidateSize();
     },
 
