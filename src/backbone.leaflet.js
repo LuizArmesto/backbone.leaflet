@@ -35,6 +35,9 @@
   // Extend `Backbone.Model`, adding georef support.
   var GeoModel = Leaflet.GeoModel = Backbone.Model.extend({
 
+    // Set `true` to keep the id attribute as primary key when creating JSON.
+    keepId: false,
+
     // Set a hash of model attributes on the object, firing `"change"` unless
     // you choose to silence it.
     set: function ( key, val, options ) {
@@ -54,6 +57,9 @@
           geometry.coordinates = geometry['coordinates'].slice();
         }
         _attrs['geometry'] = geometry;
+        if ( attrs[this.idAttribute] ) {
+          _attrs[this.idAttribute] = attrs[this.idAttribute];
+        }
         args = [_attrs, options];
       }
       return Backbone.Model.prototype.set.apply( this, args );
@@ -75,11 +81,15 @@
       if ( geometry ) {
         geometry.coordinates = geometry['coordinates'].slice();
       }
-      return {
+      var json = {
         type: 'Feature',
         geometry: geometry,
         properties: props
       };
+      if ( this.keepId ) {
+        json[ this.idAttribute ] = this.id;
+      }
+      return json;
     }
 
   });
