@@ -431,7 +431,7 @@
     // Override this to use a custom tile layer.
     getTileLayer: function () {
       return new L.TileLayer(
-        'http:///{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png', {
+        'http://{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png', {
           attribution: 'Data, imagery and map information provided by ' +
                        '<a href="http://www.mapquest.com/">MapQuest</a>, ' +
                        '<a href="http://www.openstreetmap.org/">' +
@@ -673,7 +673,7 @@
     // Replace the default tile layer to use `MapQuest Open Aerial` tiles.
     getTileLayer: function () {
       return new L.TileLayer(
-        'http:///{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg', {
+        'http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg', {
         attribution: 'Data and imagery provided by ' +
                      '<a href="http://www.mapquest.com/">MapQuest</a>. ' +
                      'Portions Courtesy NASA/JPL-Caltech and ' +
