@@ -149,6 +149,8 @@
   PopupView.extend = Backbone.View.extend;
 
   _.extend( PopupView.prototype, Backbone.View.prototype, {
+      constructor: PopupView,
+
       template: _.template( '<strong><'+'%= properties.name %'+'></strong><p><%'+'= properties.description %'+'></p>' ),
 
       // Render the model into popup.
@@ -326,6 +328,9 @@
 
   // Inherit `Backbone.View`.
   _.extend( MapView.prototype, Backbone.View.prototype, {
+    // Prevents weird bug related to Aura component.
+    constructor: MapView,
+
     // Default options used to create the Leaflet map.
     // See http://leafletjs.com/reference.html#geojson-options
     defaultLayerOptions: {

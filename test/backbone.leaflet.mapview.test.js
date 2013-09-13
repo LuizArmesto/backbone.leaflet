@@ -57,6 +57,11 @@
         expect( MapView.prototype.initialize ).to.be.equal( Backbone.View.prototype.initialize );
       });
 
+      it( 'should have the correct prototype.constructor', function () {
+        var MapView = Backbone.Leaflet.MapView;
+        expect( MapView.prototype.constructor ).to.be.equal( MapView );
+      });
+
       it( 'should initialize a `map` property', function () {
         expect( this.mapView ).to.have.property( 'map' );
         expect( this.mapView.map ).to.be.instanceOf( L.Map );
