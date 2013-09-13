@@ -40,7 +40,9 @@
 
     afterEach( function () {
       // Remove the `MapView` instance after each test.
-      this.mapView.remove();
+      if (this.mapView) {
+        this.mapView.remove();
+      }
       this.mapView = null;
     });
 

@@ -1,4 +1,4 @@
-# Backbone.Leaflet (0.0.1-dev)
+# Backbone.Leaflet (0.1.0)
 
 [![Continuous Integration status](https://secure.travis-ci.org/LuizArmesto/backbone.leaflet.png)](http://travis-ci.org/LuizArmesto/backbone.leaflet)
 
@@ -10,7 +10,8 @@ You should be familiar with both Backbone and Leaflet to get the best use out of
 
 __Dependencies__:
  * [Backbone 1.0.0](http://backbonejs.org/#downloads) and its dependencies
- * [Leaflet 0.5.1](http://leafletjs.com/download.html)
+ * [Leaflet 0.6.4](http://leafletjs.com/download.html)
+
 
 
 ## Backbone.Leaflet.GeoModel

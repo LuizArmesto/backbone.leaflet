@@ -1,6 +1,9 @@
-/*! backbone.leaflet - v0.0.1-dev - 8/25/2013
+/*!
+* backbone.leaflet
+* v0.1.0 - 2013-09-13
 * http://github.com/LuizArmesto/backbone.leaflet
-* Copyright (c) 2013 Luiz Armesto; Licensed MIT */
+* (c) Luiz Armesto; MIT License
+*/
 
 (function ( Backbone, _, L ) {
   "use strict";
@@ -12,7 +15,7 @@
   var Leaflet = {};
 
   // Current version of the component. Keep in sync with `package.json`.
-  Leaflet.VERSION = '0.0.1-dev';
+  Leaflet.VERSION = '0.1.0';
 
   // Save the previous value of the `Leaflet` attribute.
   var previousBackboneLeaflet = Backbone.Leaflet;

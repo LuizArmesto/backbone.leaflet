@@ -1,0 +1,16 @@
+{
+  "name": "backbone.leaflet",
+  "version": "0.1.0",
+  "description": "A map component for Backbone.js",
+  "homepage": "http://github.com/LuizArmesto/backbone.leaflet",
+  "author": "Luiz Armesto",
+  "main": [
+    "dist/backbone.leaflet.js"
+  ],
+   "dependencies": {
+    "jquery": "~1.10.x",
+    "underscore": "~1.5.x",
+    "backbone": "~1.0.x",
+    "leaflet": "~0.6.x"
+  }
+}

@@ -96,7 +96,6 @@
           coordinates: [-10.0, 42.5]
         };
 
-        expect( this.geoModel.toJSON() ).to.be.deep.equal( featureGeoJSON );
         this.geoModel.set( 'hey', 'You' );
         this.geoModel.set({ yabba: 'Dabadoo' });
         this.geoModel.set( 'geometry', geometry );
