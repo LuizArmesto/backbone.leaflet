@@ -7,10 +7,15 @@
   "main": [
     "dist/backbone.leaflet.js"
   ],
-   "dependencies": {
+  "dependencies": {
     "jquery": "1.11.x",
     "underscore": "1.6.x",
     "backbone": "1.1.x",
     "leaflet": "0.7.x"
+  },
+  "devDependencies": {
+    "mocha": "1.8.x",
+    "sinon": "1.8.x",
+    "chai": "1.9.x"
   }
 }
