@@ -302,6 +302,8 @@
   // Backbone view to display `Backbone.Leaflet.GeoModel` and
   // `Backbone.Leaflet.GeoCollection` instances on map.
   var MapView = Leaflet.MapView = function ( options ) {
+    // Temporary fix to make compatible with backbone 1.1.x
+    this.options = options || {};
     Backbone.View.apply( this, arguments );
     this._ensureMap();
     this._initDrawControl();
