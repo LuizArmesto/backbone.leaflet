@@ -164,7 +164,6 @@
           this.popup.setContent( this.el );
         }
         this.$el.html( this.template( this.model.toJSON() ) );
-        this.popup._update();
         return this;
       },
 
@@ -540,6 +539,10 @@
         that._updateLayerStyle( e.layer, model );
         // Add model to collection. This should be the last thing done.
         that.collection.add( model );
+        that.map.fire.apply( that.map, ['layer_draw', [ {
+                target: e.layer,
+                type: 'draw'
+            } ] ] );
       });
 
 

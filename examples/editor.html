@@ -4,10 +4,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" href="../lib/css/leaflet.css" />
     <link rel="stylesheet" href="../lib/css/leaflet.draw.css" />
-    <!--[if lte IE 8]>
-    <link rel="stylesheet" href="../lib/css/leaflet.ie.css" />
-    <link rel="stylesheet" href="../lib/css/leaflet.draw.ie.css" />
-    <![endif]-->
     <style>
       .map {
         width: 700px;
@@ -154,7 +150,7 @@
         // Bind `map` events using `map` as selector and `layers` events using
         // `layer` as selector.
         events: {
-          'draw:created map': 'onDraw',
+          'draw layer': 'onDraw',
           'click layer': 'onLayerClick',
           'mouseover layer': 'onLayerMouseover',
           'mouseout layer': 'onLayerMouseout'
@@ -162,7 +158,7 @@
 
         // Get the layer drawn.
         onDraw: function ( e ) {
-          var layer = e.layer;
+          var layer = e.target;
           var model = this.collection.get( layer );
           model.set({ name: model.get( 'geometry' ).type + ' ' + model.cid });
         },
