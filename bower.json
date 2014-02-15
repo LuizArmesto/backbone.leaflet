@@ -8,9 +8,9 @@
     "dist/backbone.leaflet.js"
   ],
    "dependencies": {
-    "jquery": "~1.10.x",
-    "underscore": "~1.5.x",
-    "backbone": "~1.0.x",
-    "leaflet": "~0.6.x"
+    "jquery": "1.11.x",
+    "underscore": "1.6.x",
+    "backbone": "1.1.x",
+    "leaflet": "0.7.x"
   }
 }
