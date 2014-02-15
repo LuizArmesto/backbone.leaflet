@@ -1,4 +1,4 @@
-# Backbone.Leaflet (0.1.0)
+# Backbone.Leaflet (0.1.1)
 
 [![Continuous Integration status](https://secure.travis-ci.org/LuizArmesto/backbone.leaflet.png)](http://travis-ci.org/LuizArmesto/backbone.leaflet)
 
