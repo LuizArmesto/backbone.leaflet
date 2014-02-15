@@ -9,8 +9,8 @@ __Backbone.Leaflet__ is a [Backbone](http://backbonejs.org/) plugin designed to 
 You should be familiar with both Backbone and Leaflet to get the best use out of this plugin.
 
 __Dependencies__:
- * [Backbone 1.0.0](http://backbonejs.org/#downloads) and its dependencies
- * [Leaflet 0.6.4](http://leafletjs.com/download.html)
+ * [Backbone 1.1.x](http://backbonejs.org/#downloads) and its dependencies
+ * [Leaflet 0.7.x](http://leafletjs.com/download.html)
 
 
 
@@ -167,6 +167,41 @@ Indent your code with 2 spaces, strip trailing whitespace and take care to maint
 
 Also, please don't edit files in the _"dist"_ subdirectory as they are generated via grunt. You'll find source code in the _"src"_ subdirectory!
 
+### Installing Dependencies
+
+To contribute you will have to install some development dependencies. This assume you already have [Node.js](http://nodejs.org/) and [npm](https://www.npmjs.org/) installed on your system.
+
+First install [Grunt](http://gruntjs.com/) and [Bower](http://bower.io/).
+
+```
+  sudo npm install -g grunt-cli
+  sudo npm install -g bower
+```
+
+Now install all dependencies.
+
+```
+  npm install
+  bower install
+```
+
+Finally, you will be ready to develop and contribute :)
+
+### Testing
+
+Use grunt to test the code.
+
+```
+  grunt test
+```
+
+### Building
+
+Use grunt to build.
+
+```
+  grunt build
+```
 
 ## License
-Copyright (c) 2013 Luiz Armesto Licensed under the MIT license.
+Copyright (c) 2014 Luiz Armesto Licensed under the MIT license.
