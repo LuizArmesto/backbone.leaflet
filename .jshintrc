@@ -15,6 +15,7 @@
     "console": true,
     "require": true,
     "define": true,
+    "module": true,
     "_": true,
     "$": true
   }
