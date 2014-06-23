@@ -1,28 +1,43 @@
 /*!
 * backbone.leaflet
-* v0.1.1 - 2014-02-15
+* v0.1.1 - 2014-06-24
 * http://github.com/LuizArmesto/backbone.leaflet
 * (c) Luiz Armesto; MIT License
 */
 
-(function ( Backbone, _, L ) {
+(function(root, factory) {
+
+  if (typeof define === 'function' && define.amd) {
+    define(['backbone', 'underscore', 'leaflet'], function(Backbone, _, L) {
+      return factory(Backbone, _, L);
+    });
+  } else if (typeof exports !== 'undefined') {
+    var Backbone = require('backbone');
+    var _ = require('underscore');
+    var L = require('leaflet');
+    module.exports = factory(Backbone, _, L);
+  } else {
+    factory(root.Backbone, root._, root.Leaflet);
+  }
+
+}(this, function(Backbone, _, L) {
   "use strict";
 
   // Get jQuery from Backbone.
   var $ = Backbone.$;
-
+  
   // The top-level namespace. All public classes will be attached to this.
   var Leaflet = {};
-
+  
   // Current version of the component. Keep in sync with `package.json`.
   Leaflet.VERSION = '0.1.1';
-
+  
   // Save the previous value of the `Leaflet` attribute.
   var previousBackboneLeaflet = Backbone.Leaflet;
-
+  
   // Attach our namespace to `Backbone` variable.
   Backbone.Leaflet = Leaflet;
-
+  
   // Runs Backbone.Leaflet in *noConflict* mode, returning the `Backbone`
   // `Leaflet` attribute to its previous owner. Returns a reference to our
   // object.
@@ -30,19 +45,19 @@
     Backbone.Leaflet = previousBackboneLeaflet;
     return this;
   };
-
+  
   // -------------------------------------------------------------------------
   // -------------------------------------------------------------------------
-
+  
   // Backbone.Leaflet.GeoModel
   // -------------------------
-
+  
   // Extend `Backbone.Model`, adding georef support.
   var GeoModel = Leaflet.GeoModel = Backbone.Model.extend({
-
+  
     // Set `true` to keep the id attribute as primary key when creating JSON.
     keepId: false,
-
+  
     // Set a hash of model attributes on the object, firing `"change"` unless
     // you choose to silence it.
     set: function ( key, val, options ) {
@@ -69,7 +84,7 @@
       }
       return Backbone.Model.prototype.set.apply( this, args );
     },
-
+  
     // The GeoJSON representation of a `Feature`.
     // http://www.geojson.org/geojson-spec.html#feature-objects
     toJSON: function ( options ) {
@@ -96,20 +111,20 @@
       }
       return json;
     }
-
+  
   });
-
+  
   // -------------------------------------------------------------------------
   // -------------------------------------------------------------------------
-
+  
   // Backbone.Leaflet.GeoCollection
   // ------------------------------
-
+  
   // Extend `Backbone.Collection`, adding georef support.
   var GeoCollection = Leaflet.GeoCollection = Backbone.Collection.extend({
     // Default model.
     model: GeoModel,
-
+  
     // When you have more items than you want to add or remove individually,
     // you can reset the entire set with a new list of models, without firing
     // any `add` or `remove` events. Fires `reset` when finished.
@@ -121,7 +136,7 @@
       return Backbone.Collection.prototype.reset.apply( this,
                                                         [models, options] );
     },
-
+  
     // The GeoJSON representation of a `FeatureCollection`.
     // http://www.geojson.org/geojson-spec.html#feature-collection-objects
     toJSON: function ( options ) {
@@ -132,16 +147,16 @@
         features: features
       };
     }
-
+  
   });
-
-
+  
+  
   // -------------------------------------------------------------------------
   // -------------------------------------------------------------------------
-
+  
   // Backbone.Leaflet.PopupView
   // --------------------------
-
+  
   // Extend `Backbone.View`.
   var PopupView = Leaflet.PopupView = function ( options ) {
     // TODO: Write documentation about this
@@ -149,15 +164,15 @@
     // Create the Leaflet Popup instance used to display this view.
     this.popup = new L.Popup( options );
   };
-
+  
   // Set up inheritance.
   PopupView.extend = Backbone.View.extend;
-
+  
   _.extend( PopupView.prototype, Backbone.View.prototype, {
       constructor: PopupView,
-
+  
       template: _.template( '<strong><'+'%= properties.name %'+'></strong><p><%'+'= properties.description %'+'></p>' ),
-
+  
       // Render the model into popup.
       render: function () {
         if ( this.popup._content !== this.el ) {
@@ -166,7 +181,7 @@
         this.$el.html( this.template( this.model.toJSON() ) );
         return this;
       },
-
+  
       // Set new model to be rendered.
       setModel: function ( model ) {
         if ( model ) {
@@ -179,31 +194,31 @@
         return this;
       }
   });
-
+  
   // -------------------------------------------------------------------------
   // -------------------------------------------------------------------------
-
+  
   // Helper functions
   // ----------------
-
+  
   // Default pointToLayer function to GeoJSON layer.
   var layerPointToLayer = function ( feature, latLng ) {
     var model = this._getModelByFeature( feature );
     return new L.Marker( latLng, this.layerStyle( model ) );
   };
-
+  
   // Default filter function to GeoJSON layer.
   var layerFilter = function ( feature, layer ) {
     var model = this._getModelByFeature( feature );
     return this.modelFilter( model );
   };
-
+  
   // Default style function to GeoJSON layer.
   var layerStyle = function ( feature ) {
     var model = this._getModelByFeature( feature );
     return this.layerStyle( model );
   };
-
+  
   // Associates Backbone model and GeoJSON layer.
   var layerOnEachFeature = function ( feature, layer ) {
     this._layers[feature.properties.cid] = layer;
@@ -234,8 +249,8 @@
       });
     });
   };
-
-
+  
+  
   // Converts the `Leaflet` layer type to GeoJSON geometry type.
   var layerTypeToGeometryType = function ( layerType ) {
     // FIXME: Write some tests.
@@ -251,36 +266,36 @@
         throw new Error( "GeoJSON don't allows " + layerType + " as geometry." );
     }
   };
-
-
+  
+  
   // Get the GeoJSON geometry coordinates from `Leaflet` layer.
   var layerToCoords = function ( layer, type ) {
     // FIXME: Write some tests.
     var latLngs;
     var coords = [];
-
+  
     // Use duck typing to get the `LatLng` objects from layer.
     if ( _.isFunction( layer.getLatLngs ) ) {
       latLngs = layer.getLatLngs();
     } else if ( _.isFunction( layer.getLatLng ) ) {
       latLngs = [ layer.getLatLng() ];
     }
-
+  
     // Convert the `LatLng` objects to GeoJSON compatible array.
     _.each( latLngs, function ( latLng ) {
       coords.push( [ latLng.lng, latLng.lat ] );
     });
-
+  
     if ( type === 'polygon' || type === 'rectangle' ) {
       coords = [ coords ];
     } else if ( type === 'marker' ) {
       coords = coords[0];
     }
-
+  
     return coords;
   };
-
-
+  
+  
   // Creates a GeoJSON from `Leaflet` layer.
   var layerToGeoJSON = function ( layer, type ) {
     // FIXME: Write some tests.
@@ -293,16 +308,16 @@
       "properties": {}
     };
   };
-
+  
   // Cached regex to split keys for `delegate`.
   var delegateEventSplitter = /^(\S+)\s*(.*)$/;
-
+  
   // -------------------------------------------------------------------------
   // -------------------------------------------------------------------------
-
+  
   // Backbone.Leaflet.MapView
   // ------------------------
-
+  
   // Backbone view to display `Backbone.Leaflet.GeoModel` and
   // `Backbone.Leaflet.GeoCollection` instances on map.
   var MapView = Leaflet.MapView = function ( options ) {
@@ -328,15 +343,15 @@
       this.redraw();
     }
   };
-
+  
   // Set up inheritance.
   MapView.extend = Backbone.View.extend;
-
+  
   // Inherit `Backbone.View`.
   _.extend( MapView.prototype, Backbone.View.prototype, {
     // Prevents weird bug related to Aura component.
     constructor: MapView,
-
+  
     // Default options used to create the Leaflet map.
     // See http://leafletjs.com/reference.html#geojson-options
     defaultLayerOptions: {
@@ -345,16 +360,16 @@
       style: layerStyle,
       onEachFeature: layerOnEachFeature
     },
-
+  
     // Default visual style to be applied to model exhibition on map.
     // For more information see
     // http://leafletjs.com/reference.html#marker-options
     // http://leafletjs.com/reference.html#path-options
     // http://leafletjs.com/reference.html#polyline-options
     defaultStyle: {
-
+  
     },
-
+  
     // Default options used to create the Leaflet map.
     defaultMapOptions: {
       center: [ -23.5, -46.6167 ],
@@ -362,23 +377,23 @@
       // Add draw control if `Leaflet.draw` plugin was loaded.
       drawControl: (L.Draw != null)
     },
-
+  
     // Default options used to create the Leaflet popup.
     defaultPopupOptions: {
-
+  
     },
-
+  
     render: function () {
       this.map.invalidateSize();
     },
-
+  
     redraw: function () {
       this._layers = {};
       this._layer.clearLayers();
       this._layer.addData( this.collection.toJSON({ cid: true }) );
       return this;
     },
-
+  
     // Call `Backbone.View.prototype.delegateEvents` then bind events with
     // `map` selector to `Leaflet` map object.
     //
@@ -413,7 +428,7 @@
             eventName = match[1],
             selector = match[2];
         method = _.bind( method, this );
-
+  
         // Now we bind events with `map` selector to `Leaflet` map.
         if ( selector === 'map' || selector === 'layer' ) {
           if ( selector === 'layer' ) {
@@ -427,7 +442,7 @@
       }
       return this;
     },
-
+  
     // Clears all callbacks previously bound to the map with our custom
     // `delegateEvents`, then call `undelegateEvents` from `Backbone.View`.
     undelegateEvents: function () {
@@ -437,7 +452,7 @@
       this._leaflet_events = null;
       return Backbone.View.prototype.undelegateEvents.apply( this, arguments );
     },
-
+  
     // Return a `L.TileLayer` instance. Uses the `MapQuest` tiles by default.
     // Override this to use a custom tile layer.
     getTileLayer: function () {
@@ -453,7 +468,7 @@
         }
       );
     },
-
+  
     // Open the popup for `obj`, using `content` if defined.
     // If the optional `content` parameter was not passed, use the popupView.
     // The `obj` parameter can be a model or a layer.
@@ -476,7 +491,7 @@
       }
       layer.openPopup();
     },
-
+  
     // Ensure that the vie has a `Leaflet` popup.
     _ensurePopup: function () {
       if ( !this.popup ) {
@@ -491,14 +506,14 @@
         this.popup = this.popupView.popup;
       }
     },
-
+  
     // Ensure that the view has a `Leaflet` map object.
     _ensureMap: function () {
       if ( this.map ) {
           // We already have initialized the `Leaflet` map.
           return;
       }
-
+  
       // Set the map options values. `options.map` accepts all `L.Map`
       // options.
       // http://leafletjs.com/reference.html#map-constructor
@@ -510,17 +525,17 @@
       this.tileLayer = this.getTileLayer();
       this.tileLayer.addTo( this.map );
     },
-
+  
     // Initialize the draw control if the `Leaflet.draw` plugin was loaded.
     _initDrawControl: function () {
       // FIXME: Write some tests.
       var that = this;
-
+  
       if ( L.Draw === null || !this.mapOptions.drawControl ) {
         // User don't want the editor or don't have the plugin loaded.
         return;
       }
-
+  
       // Get the layers created by the user using `Leaflet.draw`.
       this.map.on( 'draw:created', function ( e ) {
         var geoJSON;
@@ -544,10 +559,10 @@
                 type: 'draw'
             } ] ] );
       });
-
-
+  
+  
     },
-
+  
     // Function that will be used to decide whether to show a feature or not.
     // Returns `true` to show or `false` to hide.
     //
@@ -564,7 +579,7 @@
       // Don't allow duplicated points for the same model
       return !this._layers[model.cid];
     },
-
+  
     // Function that will be used to get style options for vector layers
     // created for GeoJSON features.
     // Override this to change the layers style.
@@ -584,19 +599,19 @@
       }
       return this.defaultStyle;
     },
-
+  
     // Returns the Backbone Model associated to the Leaflet Feature received.
     _getModelByFeature: function ( feature ) {
       var models = _.where( this.collection.models,
                             {cid: feature.properties.cid} );
       return models[0];
     },
-
+  
     // Returns the Leaflet Layer associated tp the Backbone Model received.
     _getLayerByModel: function ( model ) {
         return this._layers[model.cid];
     },
-
+  
     // Ensure that the collection has a `GeoJSON` layer.
     _getLayer: function () {
       var methods, layerOptions;
@@ -608,12 +623,12 @@
       }, this );
       return new L.GeoJSON( null, layerOptions );
     },
-
+  
     // Add to map the model added to collection
     _onReset: function () {
       this.redraw();
     },
-
+  
     // Add to map the model added to collection
     _onAdd: function ( model ) {
       // Don't duplicate a layer already drawn.
@@ -623,7 +638,7 @@
       }
       this._layer.addData( model.toJSON({ cid: true }) );
     },
-
+  
     // Remove from map the model removed from collection
     _onRemove: function ( model ) {
       var layer = this._layers[model.cid];
@@ -632,7 +647,7 @@
         this._layers[model.cid] = null;
       }
     },
-
+  
     // Updates the map layer
     _onChange: function ( model ) {
       // FIXME: Write some tests.
@@ -646,7 +661,7 @@
         this._updateLayerStyle( layer, model );
       }
     },
-
+  
     // Updates the layer style using model data
     _updateLayerStyle: function ( layer, model ) {
       // FIXME: Write some tests.
@@ -665,26 +680,26 @@
         }
       }
     }
-
+  
   });
-
+  
   // -------------------------------------------------------------------------
   // -------------------------------------------------------------------------
-
+  
   // Backbone.Leaflet.SatelliteView
   // ------------------------------
-
+  
   // Backbone view to display `Backbone.Leaflet.GeoModel` and
   // `Backbone.Leaflet.GeoCollection` instances on satellite map.
   // Extends `Backbone.Leaflet.MapView`.
   var SatelliteView = Leaflet.SatelliteView = MapView.extend({
-
+  
     // Default options used to create the Leaflet map.
     defaultMapOptions: {
       center: [ -23.5, -46.6167 ],
       zoom: 11
     },
-
+  
     // Replace the default tile layer to use `MapQuest Open Aerial` tiles.
     getTileLayer: function () {
       return new L.TileLayer(
@@ -697,7 +712,8 @@
         }
       );
     }
-
+  
   });
-
-}( Backbone, _, L ));
+  
+  return Backbone;
+}));
