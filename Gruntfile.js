@@ -1,13 +1,7 @@
 module.exports = function(grunt) {
   'use strict';
 
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-connect');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-contrib-yuidoc');
-  grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-mocha');
+  require('load-grunt-tasks')(grunt);
 
   var PORT = 8899;
 
@@ -51,7 +45,7 @@ module.exports = function(grunt) {
         banner: '<%= banner %>'
       },
       dist: {
-        src: ['src/<%= pkg.name %>.js'],
+        src: ['dist/<%= pkg.name %>.js'],
         dest: 'dist/<%= pkg.name %>.js',
       },
     },
@@ -90,6 +84,14 @@ module.exports = function(grunt) {
         }
       }
     },
+
+    preprocess: {
+      dist: {
+        src: 'src/build/<%= pkg.name %>.js',
+        dest: 'dist/<%= pkg.name %>.js'
+      }
+    },
+
     watch: {
       files: [
         'src/**/*.js',
@@ -107,7 +109,14 @@ module.exports = function(grunt) {
     grunt.file.write(filename, rendered);
   });
 
-  grunt.registerTask('test', ['jshint', 'connect', 'mocha']);
-  grunt.registerTask('build', ['test', 'concat', 'replace-version', 'uglify']);
+  grunt.registerTask('verify-bower', function () {
+    if (!grunt.file.isDir('./bower_components')) {
+      grunt.fail.warn('Missing bower components. You should run `bower install` before.');
+    }
+  });
+
+  grunt.registerTask('test', ['verify-bower', 'jshint', 'connect', 'mocha']);
+  //grunt.registerTask('build', ['test', 'preprocess', 'concat', 'replace-version', 'uglify']);
+  grunt.registerTask('build', ['preprocess', 'concat', 'replace-version', 'uglify']);
   grunt.registerTask('default', ['test', 'watch']);
 };
