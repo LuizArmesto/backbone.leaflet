@@ -109,7 +109,13 @@ module.exports = function(grunt) {
     grunt.file.write(filename, rendered);
   });
 
-  grunt.registerTask('test', ['jshint', 'connect', 'mocha']);
+  grunt.registerTask('verify-bower', function () {
+    if (!grunt.file.isDir('./bower_components')) {
+      grunt.fail.warn('Missing bower components. You should run `bower install` before.');
+    }
+  });
+
+  grunt.registerTask('test', ['verify-bower', 'jshint', 'connect', 'mocha']);
   //grunt.registerTask('build', ['test', 'preprocess', 'concat', 'replace-version', 'uglify']);
   grunt.registerTask('build', ['preprocess', 'concat', 'replace-version', 'uglify']);
   grunt.registerTask('default', ['test', 'watch']);
