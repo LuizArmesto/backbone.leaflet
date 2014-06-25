@@ -17,6 +17,8 @@
     "define": true,
     "module": true,
     "_": true,
-    "$": true
+    "$": true,
+    "Backbone": true,
+    "L": true
   }
 }
